@@ -1,0 +1,26 @@
+# Node dependencies & build artifacts
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Python cache & virtual envs
+__pycache__/
+*.py[cod]
+*$py.class
+env/
+venv/
+ENV/
+.env
+
+# Local database & uploaded assets
+backend/orders.db
+backend/uploads/
+
+# Operating System & IDEs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.gemini/
+*.log

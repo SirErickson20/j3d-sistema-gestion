@@ -1,0 +1,929 @@
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PrintLab 3D — Tienda & Pedidos Personalizados</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #14141c;
+    --surface2: #1c1c28;
+    --border: rgba(255,255,255,0.08);
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --accent3: #f97316;
+    --text: #f0f0f5;
+    --muted: #8888aa;
+    --card-bg: #16161f;
+    --success: #22c55e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,10,15,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-shadow: 0 0 20px rgba(0,229,255,0.3);
+  }
+
+  .logo span { color: var(--text); }
+
+  nav { display: flex; gap: 2rem; }
+  nav a {
+    color: var(--muted); text-decoration: none;
+    font-size: 0.875rem; font-weight: 500;
+    letter-spacing: 0.5px; transition: color 0.2s;
+  }
+  nav a:hover { color: var(--accent); }
+
+  .header-cta {
+    background: var(--accent); color: #000;
+    border: none; padding: 0.5rem 1.25rem;
+    border-radius: 6px; font-family: 'DM Sans', sans-serif;
+    font-weight: 600; font-size: 0.875rem;
+    cursor: pointer; transition: opacity 0.2s;
+    text-decoration: none;
+  }
+  .header-cta:hover { opacity: 0.85; }
+
+  /* HERO */
+  .hero {
+    padding: 5rem 2rem 3rem;
+    text-align: center;
+    position: relative;
+  }
+
+  .hero-tag {
+    display: inline-block;
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.3);
+    color: var(--accent);
+    font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    padding: 0.35rem 1rem; border-radius: 20px;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 8vw, 6.5rem);
+    line-height: 0.95;
+    letter-spacing: 3px;
+    margin-bottom: 1rem;
+  }
+
+  .hero h1 .hl { color: var(--accent); }
+
+  .hero p {
+    color: var(--muted); font-size: 1.1rem;
+    max-width: 500px; margin: 0 auto 2.5rem;
+    line-height: 1.7;
+  }
+
+  .hero-bg {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 300px;
+    background: radial-gradient(ellipse at center, rgba(124,58,237,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* CARRUSEL */
+  .section { padding: 4rem 2rem; }
+  .section-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem; letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+  }
+  .section-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
+
+  .carousel-wrapper { overflow: hidden; position: relative; }
+
+  .carousel-track {
+    display: flex; gap: 1.25rem;
+    animation: scroll 28s linear infinite;
+    width: max-content;
+  }
+
+  .carousel-wrapper:hover .carousel-track { animation-play-state: paused; }
+
+  @keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .carousel-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 200px; flex-shrink: 0;
+    padding: 1.25rem;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: pointer;
+  }
+  .carousel-card:hover {
+    border-color: rgba(0,229,255,0.4);
+    transform: translateY(-4px);
+  }
+
+  .carousel-icon {
+    width: 100%; height: 110px;
+    background: var(--surface2);
+    border-radius: 8px; display: flex;
+    align-items: center; justify-content: center;
+    font-size: 3rem; margin-bottom: 0.75rem;
+  }
+
+  .carousel-name {
+    font-size: 0.85rem; font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  .carousel-price {
+    color: var(--accent); font-size: 1rem; font-weight: 600;
+  }
+
+  /* PRODUCTOS GRID */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .product-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.25s, transform 0.25s;
+    cursor: pointer;
+  }
+  .product-card:hover {
+    border-color: rgba(0,229,255,0.35);
+    transform: translateY(-5px);
+  }
+
+  .product-img {
+    width: 100%; height: 180px;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 4rem; position: relative;
+  }
+
+  .product-badge {
+    position: absolute; top: 10px; right: 10px;
+    background: var(--accent3); color: #fff;
+    font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 4px;
+  }
+  .product-badge.new { background: var(--success); }
+  .product-badge.promo { background: var(--accent2); }
+
+  .product-body { padding: 1.1rem 1.25rem 1.25rem; }
+
+  .product-cat {
+    color: var(--muted); font-size: 0.7rem;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    margin-bottom: 0.3rem;
+  }
+
+  .product-name {
+    font-size: 1rem; font-weight: 600;
+    margin-bottom: 0.5rem; line-height: 1.3;
+  }
+
+  .product-desc {
+    color: var(--muted); font-size: 0.8rem;
+    line-height: 1.5; margin-bottom: 1rem;
+  }
+
+  .product-footer {
+    display: flex; align-items: center;
+    justify-content: space-between;
+  }
+
+  .product-price {
+    font-size: 1.35rem; font-weight: 600;
+    color: var(--accent);
+  }
+  .product-price span {
+    font-size: 0.7rem; color: var(--muted);
+    display: block; font-weight: 400;
+  }
+
+  .btn-add {
+    background: var(--accent); color: #000;
+    border: none; padding: 0.45rem 0.9rem;
+    border-radius: 6px; font-family: 'DM Sans', sans-serif;
+    font-weight: 700; font-size: 0.8rem;
+    cursor: pointer; transition: opacity 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .btn-add:hover { opacity: 0.8; }
+
+  /* SEPARADOR PERSONALIZADO */
+  .custom-divider {
+    margin: 0 2rem;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent2), var(--accent), transparent);
+    border-radius: 2px;
+  }
+
+  /* CUSTOM ORDERS SECTION */
+  .custom-section {
+    padding: 4rem 2rem;
+    background: var(--surface);
+    margin: 3rem 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .custom-section::before {
+    content: '';
+    position: absolute; top: -80px; right: -80px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%);
+  }
+
+  .custom-section::after {
+    content: '';
+    position: absolute; bottom: -60px; left: -60px;
+    width: 250px; height: 250px;
+    background: radial-gradient(circle, rgba(0,229,255,0.08) 0%, transparent 70%);
+  }
+
+  .custom-header {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; flex-wrap: wrap;
+    gap: 1rem; margin-bottom: 2.5rem;
+    position: relative; z-index: 1;
+  }
+
+  .custom-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(124,58,237,0.15);
+    border: 1px solid rgba(124,58,237,0.4);
+    color: #a78bfa;
+    font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 0.35rem 1rem; border-radius: 20px;
+    margin-bottom: 0.75rem;
+  }
+
+  .custom-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    letter-spacing: 2px; line-height: 1;
+  }
+  .custom-title .hl { color: #a78bfa; }
+
+  .custom-info {
+    display: flex; flex-direction: column; gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  .info-chip {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--muted); font-size: 0.85rem;
+  }
+  .info-chip::before {
+    content: '✓'; color: var(--success);
+    font-weight: 700; font-size: 0.8rem;
+  }
+
+  /* FORM */
+  .custom-form {
+    background: var(--card-bg);
+    border: 1px solid rgba(124,58,237,0.25);
+    border-radius: 16px;
+    padding: 2rem;
+    position: relative; z-index: 1;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  .form-label {
+    font-size: 0.78rem; font-weight: 600;
+    color: var(--muted); letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .form-control {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.65rem 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .form-control:focus { border-color: rgba(124,58,237,0.6); }
+  .form-control::placeholder { color: rgba(136,136,170,0.5); }
+
+  select.form-control { cursor: pointer; }
+
+  textarea.form-control { resize: vertical; min-height: 100px; }
+
+  /* MATERIAL SELECTOR */
+  .material-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.65rem;
+    margin-top: 0.4rem;
+  }
+
+  .material-card {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0.65rem 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .material-card:hover { border-color: rgba(124,58,237,0.5); }
+  .material-card.selected {
+    background: rgba(124,58,237,0.15);
+    border-color: #7c3aed;
+  }
+  .material-card .mat-icon { font-size: 1.5rem; margin-bottom: 0.25rem; }
+  .material-card .mat-name { font-size: 0.75rem; font-weight: 600; }
+  .material-card .mat-desc { font-size: 0.65rem; color: var(--muted); }
+
+  /* FILE UPLOAD */
+  .upload-area {
+    background: var(--surface2);
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+  .upload-area:hover {
+    border-color: rgba(0,229,255,0.4);
+    background: rgba(0,229,255,0.03);
+  }
+  .upload-area input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+  }
+  .upload-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+  .upload-text { font-size: 0.85rem; color: var(--muted); }
+  .upload-text strong { color: var(--accent); }
+  .upload-formats { font-size: 0.72rem; color: var(--muted); margin-top: 0.25rem; }
+
+  /* COLOR PICKER */
+  .color-row {
+    display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.4rem;
+  }
+  .color-swatch {
+    width: 28px; height: 28px;
+    border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .color-swatch:hover { transform: scale(1.15); }
+  .color-swatch.selected { border-color: white; transform: scale(1.2); }
+
+  /* PRICE ESTIMATOR */
+  .price-estimator {
+    background: rgba(0,229,255,0.05);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 10px;
+    padding: 1.25rem;
+    margin-top: 1.25rem;
+    display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .estimate-label {
+    font-size: 0.8rem; color: var(--muted); margin-bottom: 0.2rem;
+    text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
+  }
+  .estimate-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem; color: var(--accent);
+    letter-spacing: 1px;
+  }
+  .estimate-note { font-size: 0.75rem; color: var(--muted); }
+
+  .btn-submit {
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    color: white;
+    border: none;
+    padding: 0.85rem 2rem;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700; font-size: 0.95rem;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s, transform 0.15s;
+    display: flex; align-items: center; gap: 8px;
+    white-space: nowrap;
+  }
+  .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* PROCESS STEPS */
+  .steps-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+    position: relative; z-index: 1;
+  }
+
+  .step-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+  }
+  .step-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem; color: rgba(124,58,237,0.35);
+    line-height: 1;
+  }
+  .step-title {
+    font-size: 0.85rem; font-weight: 600; margin: 0.25rem 0;
+  }
+  .step-desc {
+    color: var(--muted); font-size: 0.75rem; line-height: 1.4;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: gap;
+    color: var(--muted); font-size: 0.8rem;
+  }
+
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem; color: var(--accent); letter-spacing: 1px;
+  }
+
+  /* NOTIFICATION */
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem;
+    background: var(--success); color: #000;
+    padding: 0.75rem 1.25rem; border-radius: 8px;
+    font-weight: 600; font-size: 0.875rem;
+    transform: translateY(80px); opacity: 0;
+    transition: all 0.3s; z-index: 999;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    nav { display: none; }
+    .form-grid { grid-template-columns: 1fr; }
+    .custom-section { padding: 3rem 1.25rem; }
+    .products-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .section { padding: 3rem 1.25rem; }
+    header { padding: 0 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">Print<span>Lab</span> 3D</div>
+  <nav>
+    <a href="#productos">Productos</a>
+    <a href="#personalizado">Personalizado</a>
+    <a href="#proceso">Proceso</a>
+    <a href="#contacto">Contacto</a>
+  </nav>
+  <a href="#personalizado" class="header-cta">Pedir Ahora</a>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-tag">⚡ Impresión 3D Profesional</div>
+  <h1>OBJETOS ÚNICOS<br><span class="hl">IMPRESOS</span><br>PARA VOS</h1>
+  <p>Diseños de catálogo o pedidos completamente personalizados. Calidad premium, entrega rápida.</p>
+  <a href="#personalizado" style="display:inline-block; background:var(--accent); color:#000; font-weight:700; padding:0.75rem 2rem; border-radius:8px; text-decoration:none; letter-spacing:0.5px; font-size:0.95rem; margin-right:0.75rem;">Crear pedido personalizado</a>
+  <a href="#productos" style="display:inline-block; border:1px solid var(--border); color:var(--muted); font-weight:500; padding:0.75rem 2rem; border-radius:8px; text-decoration:none; font-size:0.95rem;">Ver catálogo</a>
+</section>
+
+<!-- CARRUSEL -->
+<section class="section">
+  <p class="section-label">PRODUCTOS DESTACADOS</p>
+  <p class="section-sub">Pasá el cursor para pausar</p>
+  <div class="carousel-wrapper">
+    <div class="carousel-track" id="carouselTrack">
+      <!-- Items originales -->
+      <div class="carousel-card"><div class="carousel-icon">🏆</div><div class="carousel-name">Medalla Personalizada</div><div class="carousel-price">$2.500</div></div>
+      <div class="carousel-card"><div class="carousel-icon">☕</div><div class="carousel-name">Taza con Logo</div><div class="carousel-price">$3.200</div></div>
+      <div class="carousel-card"><div class="carousel-icon">🖼️</div><div class="carousel-name">Marco Decorativo</div><div class="carousel-price">$4.100</div></div>
+      <div class="carousel-card"><div class="carousel-icon">🏠</div><div class="carousel-name">Maqueta Arquitectónica</div><div class="carousel-price">$18.000</div></div>
+      <div class="carousel-card"><div class="carousel-icon">⚙️</div><div class="carousel-name">Repuesto Técnico</div><div class="carousel-price">$1.800</div></div>
+      <div class="carousel-card"><div class="carousel-icon">🎮</div><div class="carousel-name">Figura Coleccionable</div><div class="carousel-price">$5.500</div></div>
+      <div class="carousel-card"><div class="carousel-icon">💍</div><div class="carousel-name">Joyería Custom</div><div class="carousel-price">$6.000</div></div>
+      <div class="carousel-card"><div class="carousel-icon">🔬</div><div class="carousel-name">Prototipo Funcional</div><div class="carousel-price">$12.000</div></div>
+      <div class="carousel-card"><div class="carousel-icon">🌿</div><div class="carousel-name">Maceta Diseño</div><div class="carousel-price">$2.200</div></div>
+      <div class="carousel-card"><div class="carousel-icon">🔑</div><div class="carousel-name">Llavero Personalizado</div><div class="carousel-price">$900</div></div>
+      <!-- Duplicados para loop infinito -->
+      <div class="carousel-card"><div class="carousel-icon">🏆</div><div class="carousel-name">Medalla Personalizada</div><div class="carousel-price">$2.500</div></div>
+      <div class="carousel-card"><div class="carousel-icon">☕</div><div class="carousel-name">Taza con Logo</div><div class="carousel-price">$3.200</div></div>
+      <div class="carousel-card"><div class="carousel-icon">🖼️</div><div class="carousel-name">Marco Decorativo</div><div class="carousel-price">$4.100</div></div>
+      <div class="carousel-card"><div class="carousel-icon">🏠</div><div class="carousel-name">Maqueta Arquitectónica</div><div class="carousel-price">$18.000</div></div>
+      <div class="carousel-card"><div class="carousel-icon">⚙️</div><div class="carousel-name">Repuesto Técnico</div><div class="carousel-price">$1.800</div></div>
+      <div class="carousel-card"><div class="carousel-icon">🎮</div><div class="carousel-name">Figura Coleccionable</div><div class="carousel-price">$5.500</div></div>
+      <div class="carousel-card"><div class="carousel-icon">💍</div><div class="carousel-name">Joyería Custom</div><div class="carousel-price">$6.000</div></div>
+      <div class="carousel-card"><div class="carousel-icon">🔬</div><div class="carousel-name">Prototipo Funcional</div><div class="carousel-price">$12.000</div></div>
+      <div class="carousel-card"><div class="carousel-icon">🌿</div><div class="carousel-name">Maceta Diseño</div><div class="carousel-price">$2.200</div></div>
+      <div class="carousel-card"><div class="carousel-icon">🔑</div><div class="carousel-name">Llavero Personalizado</div><div class="carousel-price">$900</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTOS GRID -->
+<section class="section" id="productos">
+  <p class="section-label">CATÁLOGO COMPLETO</p>
+  <p class="section-sub">Todos los productos disponibles para compra inmediata</p>
+
+  <div class="products-grid">
+
+    <div class="product-card">
+      <div class="product-img">🏆<span class="product-badge">Popular</span></div>
+      <div class="product-body">
+        <div class="product-cat">Reconocimientos</div>
+        <div class="product-name">Medalla Personalizada Premium</div>
+        <div class="product-desc">Medalla 3D con relieve, texto y logo grabado. Ideal para torneos, premios y eventos corporativos.</div>
+        <div class="product-footer">
+          <div class="product-price">$2.500<span>por unidad</span></div>
+          <button class="btn-add" onclick="addToCart(this)">+ Agregar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">☕<span class="product-badge new">Nuevo</span></div>
+      <div class="product-body">
+        <div class="product-cat">Hogar & Cocina</div>
+        <div class="product-name">Taza con Relieves 3D</div>
+        <div class="product-desc">Portataza o soporte decorativo con tu diseño en relieve. Material PLA resistente al calor.</div>
+        <div class="product-footer">
+          <div class="product-price">$3.200<span>por unidad</span></div>
+          <button class="btn-add" onclick="addToCart(this)">+ Agregar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">🎮</div>
+      <div class="product-body">
+        <div class="product-cat">Coleccionables</div>
+        <div class="product-name">Figura Coleccionable</div>
+        <div class="product-desc">Figuras de alta resolución para coleccionistas. Acabado liso y pintable. Múltiples tamaños.</div>
+        <div class="product-footer">
+          <div class="product-price">$5.500<span>desde</span></div>
+          <button class="btn-add" onclick="addToCart(this)">+ Agregar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">⚙️<span class="product-badge promo">-20%</span></div>
+      <div class="product-body">
+        <div class="product-cat">Industria & Técnico</div>
+        <div class="product-name">Repuesto / Pieza Técnica</div>
+        <div class="product-desc">Reemplazá piezas difíciles de conseguir. Medición exacta y material ABS de alta resistencia.</div>
+        <div class="product-footer">
+          <div class="product-price">$1.800<span>desde</span></div>
+          <button class="btn-add" onclick="addToCart(this)">+ Agregar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">🔑</div>
+      <div class="product-body">
+        <div class="product-cat">Accesorios</div>
+        <div class="product-name">Llavero Personalizado</div>
+        <div class="product-desc">Llavero con nombre, iniciales o diseño custom. Material resistente, varios colores disponibles.</div>
+        <div class="product-footer">
+          <div class="product-price">$900<span>por unidad</span></div>
+          <button class="btn-add" onclick="addToCart(this)">+ Agregar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">🌿<span class="product-badge new">Nuevo</span></div>
+      <div class="product-body">
+        <div class="product-cat">Decoración</div>
+        <div class="product-name">Maceta Geométrica</div>
+        <div class="product-desc">Diseño moderno y geométrico. Perfecta para suculentas y cactus. Material PLA biodegradable.</div>
+        <div class="product-footer">
+          <div class="product-price">$2.200<span>por unidad</span></div>
+          <button class="btn-add" onclick="addToCart(this)">+ Agregar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">🏠</div>
+      <div class="product-body">
+        <div class="product-cat">Arquitectura</div>
+        <div class="product-name">Maqueta Arquitectónica</div>
+        <div class="product-desc">Maquetas a escala para proyectos de arquitectura, presentaciones y concursos. Alta precisión.</div>
+        <div class="product-footer">
+          <div class="product-price">$18.000<span>desde</span></div>
+          <button class="btn-add" onclick="addToCart(this)">+ Agregar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">💍</div>
+      <div class="product-body">
+        <div class="product-cat">Joyería & Moda</div>
+        <div class="product-name">Joyería Custom 3D</div>
+        <div class="product-desc">Anillos, colgantes y broches de diseño único. Material resinado de alta resolución. Sin moldes.</div>
+        <div class="product-footer">
+          <div class="product-price">$6.000<span>desde</span></div>
+          <button class="btn-add" onclick="addToCart(this)">+ Agregar</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- DIVISOR -->
+<div class="custom-divider"></div>
+
+<!-- PEDIDOS PERSONALIZADOS -->
+<section class="custom-section" id="personalizado">
+  <div class="custom-header">
+    <div>
+      <div class="custom-badge">✦ Sección Especial</div>
+      <div class="custom-title">CREÁ TU PEDIDO<br><span class="hl">PERSONALIZADO</span></div>
+      <div class="custom-info">
+        <div class="info-chip">Subí tu archivo STL, OBJ o 3MF</div>
+        <div class="info-chip">Elegí material, color y terminación</div>
+        <div class="info-chip">Estimación de precio al instante</div>
+        <div class="info-chip">Entrega en 3–7 días hábiles</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="custom-form">
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Nombre completo</label>
+        <input type="text" class="form-control" placeholder="Ej: María González" id="fname">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email de contacto</label>
+        <input type="email" class="form-control" placeholder="mail@ejemplo.com" id="femail">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Teléfono / WhatsApp</label>
+        <input type="tel" class="form-control" placeholder="+54 11 0000-0000" id="fphone">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipo de proyecto</label>
+        <select class="form-control" id="ftype" onchange="calcPrice()">
+          <option value="">— Seleccioná —</option>
+          <option value="1">Figura decorativa</option>
+          <option value="2">Repuesto / pieza técnica</option>
+          <option value="3">Prototipo funcional</option>
+          <option value="4">Joyería o accesorio</option>
+          <option value="5">Maqueta arquitectónica</option>
+          <option value="6">Otro</option>
+        </select>
+      </div>
+
+      <div class="form-group full">
+        <label class="form-label">Descripción del pedido</label>
+        <textarea class="form-control" placeholder="Describí tu idea lo más detallado posible: dimensiones, uso, cantidad, diseño especial, etc." id="fdesc"></textarea>
+      </div>
+
+      <!-- UPLOAD -->
+      <div class="form-group full">
+        <label class="form-label">Archivo 3D (opcional)</label>
+        <div class="upload-area" id="uploadArea">
+          <input type="file" accept=".stl,.obj,.3mf,.step,.stp" onchange="handleFile(event)">
+          <div class="upload-icon">📁</div>
+          <div class="upload-text"><strong>Hacé clic o arrastrá</strong> tu archivo acá</div>
+          <div class="upload-formats">Formatos: STL · OBJ · 3MF · STEP — máx. 50 MB</div>
+        </div>
+        <p id="fileName" style="margin-top:0.4rem; font-size:0.8rem; color:var(--success); display:none;"></p>
+      </div>
+
+      <!-- MATERIAL -->
+      <div class="form-group full">
+        <label class="form-label">Material</label>
+        <div class="material-grid" id="materialGrid">
+          <div class="material-card" onclick="selectMat(this, 1.0)" data-mult="1.0">
+            <div class="mat-icon">🟢</div>
+            <div class="mat-name">PLA</div>
+            <div class="mat-desc">Estándar, biodegradable</div>
+          </div>
+          <div class="material-card" onclick="selectMat(this, 1.3)" data-mult="1.3">
+            <div class="mat-icon">⚫</div>
+            <div class="mat-name">ABS</div>
+            <div class="mat-desc">Alta resistencia</div>
+          </div>
+          <div class="material-card" onclick="selectMat(this, 1.8)" data-mult="1.8">
+            <div class="mat-icon">🔵</div>
+            <div class="mat-name">PETG</div>
+            <div class="mat-desc">Flexible y resistente</div>
+          </div>
+          <div class="material-card" onclick="selectMat(this, 2.5)" data-mult="2.5">
+            <div class="mat-icon">⚪</div>
+            <div class="mat-name">Resina</div>
+            <div class="mat-desc">Ultra alta resolución</div>
+          </div>
+          <div class="material-card" onclick="selectMat(this, 3.0)" data-mult="3.0">
+            <div class="mat-icon">✨</div>
+            <div class="mat-name">Nylon</div>
+            <div class="mat-desc">Industrial y flexible</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACABADO -->
+      <div class="form-group">
+        <label class="form-label">Terminación</label>
+        <select class="form-control" id="ffinish" onchange="calcPrice()">
+          <option value="1">Sin terminación (en crudo)</option>
+          <option value="1.2">Lijado fino</option>
+          <option value="1.5">Pintado unicolor</option>
+          <option value="2">Pintado multicolor + barniz</option>
+        </select>
+      </div>
+
+      <!-- CANTIDAD -->
+      <div class="form-group">
+        <label class="form-label">Cantidad de unidades</label>
+        <input type="number" class="form-control" placeholder="1" min="1" id="fqty" value="1" onchange="calcPrice()">
+      </div>
+
+      <!-- COLOR -->
+      <div class="form-group full">
+        <label class="form-label">Color principal</label>
+        <div class="color-row" id="colorRow">
+          <div class="color-swatch selected" style="background:#f0f0f5;" onclick="selectColor(this)" title="Blanco"></div>
+          <div class="color-swatch" style="background:#1a1a2e;" onclick="selectColor(this)" title="Negro"></div>
+          <div class="color-swatch" style="background:#00e5ff;" onclick="selectColor(this)" title="Cian"></div>
+          <div class="color-swatch" style="background:#7c3aed;" onclick="selectColor(this)" title="Violeta"></div>
+          <div class="color-swatch" style="background:#f97316;" onclick="selectColor(this)" title="Naranja"></div>
+          <div class="color-swatch" style="background:#22c55e;" onclick="selectColor(this)" title="Verde"></div>
+          <div class="color-swatch" style="background:#ef4444;" onclick="selectColor(this)" title="Rojo"></div>
+          <div class="color-swatch" style="background:#eab308;" onclick="selectColor(this)" title="Amarillo"></div>
+          <div class="color-swatch" style="background:#ec4899;" onclick="selectColor(this)" title="Rosa"></div>
+          <div class="color-swatch" style="background:linear-gradient(135deg,#c0c0c0,#808080);" onclick="selectColor(this)" title="Plata"></div>
+          <div class="color-swatch" style="background:linear-gradient(135deg,#ffd700,#b8860b);" onclick="selectColor(this)" title="Dorado"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ESTIMADOR PRECIO -->
+    <div class="price-estimator">
+      <div>
+        <div class="estimate-label">Precio estimado</div>
+        <div class="estimate-price" id="estimatedPrice">$3.200</div>
+        <div class="estimate-note">El precio final se confirma tras revisar el archivo y detalles</div>
+      </div>
+      <button class="btn-submit" onclick="submitOrder()">
+        🚀 Enviar pedido personalizado
+      </button>
+    </div>
+  </div>
+
+  <!-- PROCESO -->
+  <div id="proceso">
+    <div style="margin-top:2.5rem; margin-bottom:1rem; font-family:'Bebas Neue',sans-serif; font-size:1.5rem; letter-spacing:1.5px; position:relative;z-index:1;">CÓMO FUNCIONA</div>
+    <div class="steps-row">
+      <div class="step-card"><div class="step-num">01</div><div class="step-title">Completás el formulario</div><div class="step-desc">Describís tu idea, elegís material y subís el archivo si tenés.</div></div>
+      <div class="step-card"><div class="step-num">02</div><div class="step-title">Te contactamos</div><div class="step-desc">En menos de 24 h revisamos tu pedido y confirmamos el presupuesto.</div></div>
+      <div class="step-card"><div class="step-num">03</div><div class="step-title">Aprobás y pagás</div><div class="step-desc">Confirmás el diseño y realizás el pago. ¡Arrancan las impresoras!</div></div>
+      <div class="step-card"><div class="step-num">04</div><div class="step-title">Recibís tu pedido</div><div class="step-desc">Enviamos a todo el país en 3–7 días hábiles con seguimiento.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="contacto">
+  <div class="footer-logo">PrintLab 3D</div>
+  <div>📍 Buenos Aires, Argentina — 📩 hola@printlab3d.com.ar</div>
+  <div>© 2025 PrintLab 3D. Todos los derechos reservados.</div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✓ ¡Producto agregado al carrito!</div>
+
+<script>
+  let selectedMat = 1.0;
+
+  function selectMat(el, mult) {
+    document.querySelectorAll('.material-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedMat = mult;
+    calcPrice();
+  }
+
+  function selectColor(el) {
+    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  function calcPrice() {
+    const type = parseInt(document.getElementById('ftype').value) || 1;
+    const finish = parseFloat(document.getElementById('ffinish').value) || 1;
+    const qty = parseInt(document.getElementById('fqty').value) || 1;
+    const base = [1500, 2200, 4000, 2800, 8000, 3000];
+    const basePrice = base[type - 1] || 2500;
+    const total = Math.round(basePrice * selectedMat * finish * qty);
+    document.getElementById('estimatedPrice').textContent = '$' + total.toLocaleString('es-AR');
+  }
+
+  function handleFile(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const p = document.getElementById('fileName');
+      p.textContent = '✓ Archivo cargado: ' + file.name;
+      p.style.display = 'block';
+    }
+  }
+
+  function addToCart(btn) {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    btn.textContent = '✓ Agregado';
+    btn.style.background = '#22c55e';
+    setTimeout(() => {
+      toast.classList.remove('show');
+      btn.textContent = '+ Agregar';
+      btn.style.background = '';
+    }, 2200);
+  }
+
+  function submitOrder() {
+    const name = document.getElementById('fname').value.trim();
+    const email = document.getElementById('femail').value.trim();
+    if (!name || !email) {
+      alert('Por favor completá nombre y email para enviar el pedido.');
+      return;
+    }
+    const toast = document.getElementById('toast');
+    toast.textContent = '🚀 ¡Pedido enviado! Te contactamos en 24 h.';
+    toast.style.background = '#7c3aed';
+    toast.style.color = '#fff';
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+      toast.textContent = '✓ ¡Producto agregado al carrito!';
+      toast.style.background = '';
+      toast.style.color = '';
+    }, 3500);
+  }
+
+  // Inicializar precio
+  calcPrice();
+</script>
+</body>
+</html\u003
