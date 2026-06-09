@@ -100,28 +100,21 @@ export function OperatorDashboard() {
     })).filter((d, idx) => d.revenue > 0 || d.orders > 0 || idx <= new Date().getMonth()); // show months up to current
   }, [filteredOrders]);
 
-  // 4. Dynamic Category Demand Data (RF16 - most requested products/categories)
-  const categoryDemandData = useMemo(() => {
-    const counts: Record<string, number> = {};
+  // 4. Custom vs Catalog order split (RF16)
+  const orderTypeSplitData = useMemo(() => {
+    let custom = 0;
+    let catalog = 0;
     filteredOrders.forEach((o) => {
-      // Group by material or generic category based on name
-      let category = 'Otros';
-      if (o.productName.toLowerCase().includes('miniatura')) category = 'Miniaturas';
-      else if (o.productName.toLowerCase().includes('mecánica') || o.productName.toLowerCase().includes('pieza')) category = 'Industrial';
-      else if (o.productName.toLowerCase().includes('dental') || o.productName.toLowerCase().includes('médico')) category = 'Médico';
-      else if (o.productName.toLowerCase().includes('maqueta') || o.productName.toLowerCase().includes('arquitectura')) category = 'Arquitectura';
-      else if (o.productName.toLowerCase().includes('joya')) category = 'Joyería';
-
-      counts[category] = (counts[category] || 0) + o.quantity;
+      if (o.id.startsWith('ORD-CUST')) custom += 1;
+      else catalog += 1;
     });
-
-    return Object.keys(counts).map((name) => ({
-      name,
-      value: counts[name],
-    }));
+    const result = [];
+    if (custom > 0) result.push({ name: 'Producto Personalizado', value: custom });
+    if (catalog > 0) result.push({ name: 'Producto de Catálogo', value: catalog });
+    return result;
   }, [filteredOrders]);
 
-  const COLORS = ['#FF1744', '#60A5FA', '#34D399', '#FCD34D', '#A78BFA'];
+  const TYPE_COLORS = ['#FF1744', '#60A5FA'];
 
   const years = ['all', '2026', '2025'];
   const months = [
@@ -311,44 +304,58 @@ export function OperatorDashboard() {
 
         {/* Bottom Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Product Demand */}
+          {/* Order Type Split */}
           <Card hover>
             <CardHeader>
-              <CardTitle>Productos más Solicitados (RF16)</CardTitle>
+              <CardTitle>Pedidos por Tipo (RF16)</CardTitle>
             </CardHeader>
             <CardContent>
-              {categoryDemandData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={250}>
-                  <PieChart>
-                    <Pie
-                      data={categoryDemandData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) =>
-                        `${name} ${(percent * 100).toFixed(0)}%`
-                      }
-                      outerRadius={70}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {categoryDemandData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#1C1C1C',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        borderRadius: '12px',
-                        color: '#fff',
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
+              {orderTypeSplitData.length > 0 ? (
+                <>
+                  <ResponsiveContainer width="100%" height={220}>
+                    <PieChart>
+                      <Pie
+                        data={orderTypeSplitData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) =>
+                          `${name} ${(percent * 100).toFixed(0)}%`
+                        }
+                        outerRadius={75}
+                        innerRadius={35}
+                        dataKey="value"
+                        paddingAngle={3}
+                      >
+                        {orderTypeSplitData.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={TYPE_COLORS[index % TYPE_COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#1C1C1C',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          borderRadius: '12px',
+                          color: '#fff',
+                        }}
+                        formatter={(value: number, name: string) => [`${value} pedido${value !== 1 ? 's' : ''}`, name]}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  {/* Legend */}
+                  <div className="flex justify-center gap-6 mt-2">
+                    {orderTypeSplitData.map((entry, index) => (
+                      <div key={entry.name} className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full inline-block" style={{ background: TYPE_COLORS[index % TYPE_COLORS.length] }} />
+                        <span className="text-xs text-[#A0A0A0]">{entry.name}</span>
+                        <span className="text-xs font-bold text-white">{entry.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
               ) : (
                 <p className="text-center text-xs text-[#A0A0A0] py-16">Sin datos para mostrar en este rango</p>
               )}

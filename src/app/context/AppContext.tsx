@@ -9,17 +9,19 @@ interface AppContextType {
   payments: Payment[];
   loginAttempts: number;
   lockoutUntil: number | null;
+  dbLoaded: boolean;
   login: (email: string, password: string, role: UserRole) => { success: boolean; error?: string };
   logout: () => void;
   createCatalogOrder: (productId: string, productName: string, quantity: number, material: string, color: string, deliveryMethod: 'delivery' | 'pickup', deliveryAddress: string, notes: string, clientName?: string, clientEmail?: string, clientPhone?: string) => Order;
   createCustomOrder: (pieceType: string, material: string, color: string, quantity: number, description: string, files: string[], clientName?: string, clientEmail?: string, clientPhone?: string) => Order;
   updateOrderStatus: (orderId: string, status: OrderStatus, role: UserRole, reason?: string) => void;
-  createQuotation: (orderId: string, weight: number, printTime: number, materialName: string, margin: number, customPrice?: number, customEstimatedDelivery?: string, renderUrl?: string, imageUrl?: string, model3DUrl?: string) => Quotation;
+  createQuotation: (orderId: string, weight: number, printTime: number, materialName: string, margin: number, customPrice?: number, customEstimatedDelivery?: string, renderUrl?: string, imageUrl?: string, model3DUrl?: string, attachments?: { name: string; dataUrl: string; type: string }[]) => Quotation;
   requestQuotationModifications: (orderId: string, comments: string) => void;
   acceptQuotation: (orderId: string) => void;
   rejectQuotation: (orderId: string, reason: string) => void;
   submitPaymentReceipt: (orderId: string, type: 'deposit' | 'final', method: string, receiptUrl: string) => void;
   verifyPayment: (orderId: string, type: 'deposit' | 'final', action: 'approve' | 'reject', reason?: string) => void;
+  clearAllData: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -30,13 +32,58 @@ export const useApp = () => {
   return context;
 };
 
+const dbName = 'j3d_db';
+const storeName = 'j3d_store';
+
+const initDB = (): Promise<IDBDatabase> => {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(dbName, 1);
+    request.onupgradeneeded = () => {
+      request.result.createObjectStore(storeName);
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+};
+
+const getVal = async (key: string): Promise<any> => {
+  try {
+    const db = await initDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(storeName, 'readonly');
+      const store = transaction.objectStore(storeName);
+      const request = store.get(key);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  } catch (err) {
+    console.error('Error reading from IndexedDB:', err);
+    return null;
+  }
+};
+
+const setVal = async (key: string, val: any): Promise<void> => {
+  try {
+    const db = await initDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(storeName, 'readwrite');
+      const store = transaction.objectStore(storeName);
+      const request = store.put(val, key);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  } catch (err) {
+    console.error('Error writing to IndexedDB:', err);
+  }
+};
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // One-time wipe of registered orders
-  if (!localStorage.getItem('j3d_orders_wiped')) {
+  const shouldWipe = !localStorage.getItem('j3d_orders_wiped_v3');
+  if (shouldWipe) {
     localStorage.removeItem('j3d_orders');
     localStorage.removeItem('j3d_quotations');
     localStorage.removeItem('j3d_payments');
-    localStorage.setItem('j3d_orders_wiped', 'true');
   }
 
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
@@ -49,6 +96,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('j3d_user', JSON.stringify(mockClient));
     return mockClient;
   });
+
+  const [dbLoaded, setDbLoaded] = useState(false);
 
   const [orders, setOrders] = useState<Order[]>(() => {
     const stored = localStorage.getItem('j3d_orders');
@@ -77,22 +126,69 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return stored ? Number(stored) : null;
   });
 
-  // Sync state to local storage
+  // Load data from IndexedDB on mount
+  useEffect(() => {
+    const loadFromIndexedDB = async () => {
+      if (shouldWipe) {
+        await setVal('j3d_orders', []);
+        await setVal('j3d_quotations', []);
+        await setVal('j3d_payments', []);
+        localStorage.setItem('j3d_orders_wiped_v3', 'true');
+        setDbLoaded(true);
+        return;
+      }
+
+      const storedOrders = await getVal('j3d_orders');
+      if (storedOrders !== undefined && storedOrders !== null) {
+        setOrders(storedOrders);
+      }
+      const storedQuotations = await getVal('j3d_quotations');
+      if (storedQuotations !== undefined && storedQuotations !== null) {
+        setQuotations(storedQuotations);
+      }
+      const storedPayments = await getVal('j3d_payments');
+      if (storedPayments !== undefined && storedPayments !== null) {
+        setPayments(storedPayments);
+      }
+      setDbLoaded(true);
+    };
+    loadFromIndexedDB();
+  }, [shouldWipe]);
+
+  // Sync state to local storage and IndexedDB
   useEffect(() => {
     localStorage.setItem('j3d_user', currentUser ? JSON.stringify(currentUser) : '');
   }, [currentUser]);
 
   useEffect(() => {
-    localStorage.setItem('j3d_orders', JSON.stringify(orders));
-  }, [orders]);
+    if (!dbLoaded) return;
+    try {
+      localStorage.setItem('j3d_orders', JSON.stringify(orders));
+    } catch (e) {
+      console.warn('localStorage limit exceeded for orders, relying on IndexedDB', e);
+    }
+    setVal('j3d_orders', orders);
+  }, [orders, dbLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('j3d_quotations', JSON.stringify(quotations));
-  }, [quotations]);
+    if (!dbLoaded) return;
+    try {
+      localStorage.setItem('j3d_quotations', JSON.stringify(quotations));
+    } catch (e) {
+      console.warn('localStorage limit exceeded for quotations, relying on IndexedDB', e);
+    }
+    setVal('j3d_quotations', quotations);
+  }, [quotations, dbLoaded]);
 
   useEffect(() => {
-    localStorage.setItem('j3d_payments', JSON.stringify(payments));
-  }, [payments]);
+    if (!dbLoaded) return;
+    try {
+      localStorage.setItem('j3d_payments', JSON.stringify(payments));
+    } catch (e) {
+      console.warn('localStorage limit exceeded for payments, relying on IndexedDB', e);
+    }
+    setVal('j3d_payments', payments);
+  }, [payments, dbLoaded]);
 
   useEffect(() => {
     localStorage.setItem('j3d_login_attempts', String(loginAttempts));
@@ -309,7 +405,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     customEstimatedDelivery?: string,
     renderUrl?: string,
     imageUrl?: string,
-    model3DUrl?: string
+    model3DUrl?: string,
+    attachments?: { name: string; dataUrl: string; type: string }[]
   ) => {
     const quoteId = `QUO-${Date.now().toString().slice(-6)}`;
     const now = new Date().toISOString();
@@ -347,16 +444,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       renderUrl,
       imageUrl,
       model3DUrl,
+      attachments: attachments || [],
       validUntil
     };
 
     setQuotations(prev => {
-      const filtered = prev.filter(q => q.orderId !== orderId);
+      const filtered = prev.filter(q => q.orderId.replace(/_/g, '-').toUpperCase() !== orderId.replace(/_/g, '-').toUpperCase());
       return [newQuotation, ...filtered];
     });
 
     setOrders(prev => prev.map(o => {
-      if (o.id !== orderId) return o;
+      if (o.id.replace(/_/g, '-').toUpperCase() !== orderId.replace(/_/g, '-').toUpperCase()) return o;
       return {
         ...o,
         status: 'quotation_sent',
@@ -379,7 +477,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const now = new Date().toISOString();
     
     setOrders(prev => prev.map(o => {
-      if (o.id !== orderId) return o;
+      if (o.id.replace(/_/g, '-').toUpperCase() !== orderId.replace(/_/g, '-').toUpperCase()) return o;
       return {
         ...o,
         status: 'pending_approval', // "En Rediseño"
@@ -393,7 +491,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
 
     setQuotations(prev => prev.map(q => {
-      if (q.orderId !== orderId) return q;
+      if (q.orderId.replace(/_/g, '-').toUpperCase() !== orderId.replace(/_/g, '-').toUpperCase()) return q;
       return { ...q, approved: false };
     }));
   };
@@ -403,7 +501,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const now = new Date().toISOString();
     
     setOrders(prev => prev.map(o => {
-      if (o.id !== orderId) return o;
+      if (o.id.replace(/_/g, '-').toUpperCase() !== orderId.replace(/_/g, '-').toUpperCase()) return o;
       return {
         ...o,
         status: 'pending_deposit', // "Pendiente de Seña"
@@ -416,7 +514,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
 
     setQuotations(prev => prev.map(q => {
-      if (q.orderId !== orderId) return q;
+      if (q.orderId.replace(/_/g, '-').toUpperCase() !== orderId.replace(/_/g, '-').toUpperCase()) return q;
       return { ...q, approved: true };
     }));
   };
@@ -426,7 +524,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const now = new Date().toISOString();
     
     setOrders(prev => prev.map(o => {
-      if (o.id !== orderId) return o;
+      if (o.id.replace(/_/g, '-').toUpperCase() !== orderId.replace(/_/g, '-').toUpperCase()) return o;
       return {
         ...o,
         status: 'cancelled',
@@ -444,7 +542,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
 
     setQuotations(prev => prev.map(q => {
-      if (q.orderId !== orderId) return q;
+      if (q.orderId.replace(/_/g, '-').toUpperCase() !== orderId.replace(/_/g, '-').toUpperCase()) return q;
       return { ...q, approved: false };
     }));
   };
@@ -459,7 +557,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const paymentId = `PAY-${Date.now().toString().slice(-6)}`;
     const now = new Date().toISOString();
 
-    const targetOrder = orders.find(o => o.id === orderId);
+    const targetOrder = orders.find(o => o.id.replace(/_/g, '-').toUpperCase() === orderId.replace(/_/g, '-').toUpperCase());
     if (!targetOrder) return;
 
     const amount = type === 'deposit' 
@@ -499,7 +597,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
         } else {
           // Custom order (has quotation)
-          const quote = quotations.find(q => q.orderId === o.id);
+          const quote = quotations.find(q => q.orderId.replace(/_/g, '-').toUpperCase() === o.id.replace(/_/g, '-').toUpperCase());
           if (quote) {
             totalPrintTime = quote.printTime; // this already includes the 1.8 multiplier
           }
@@ -588,6 +686,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
   };
 
+  const clearAllData = async () => {
+    setOrders([]);
+    setQuotations([]);
+    setPayments([]);
+    await setVal('j3d_orders', []);
+    await setVal('j3d_quotations', []);
+    await setVal('j3d_payments', []);
+    localStorage.removeItem('j3d_orders');
+    localStorage.removeItem('j3d_quotations');
+    localStorage.removeItem('j3d_payments');
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -597,6 +707,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         payments,
         loginAttempts,
         lockoutUntil,
+        dbLoaded,
         login,
         logout,
         createCatalogOrder,
@@ -607,7 +718,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         acceptQuotation,
         rejectQuotation,
         submitPaymentReceipt,
-        verifyPayment
+        verifyPayment,
+        clearAllData
       }}
     >
       {children}

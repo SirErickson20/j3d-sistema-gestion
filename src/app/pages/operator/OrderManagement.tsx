@@ -13,13 +13,24 @@ import {
   Upload,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { formatCurrency, formatDate } from '../../lib/utils';
+import { formatCurrency, formatDate, generatePlaceholderReceipt, getExtensionFromDataUrl } from '../../lib/utils';
 import { OrderStatus, Order } from '../../types';
 import { Modal } from '../../components/ui/Modal';
 import { toast } from 'sonner';
 
 export function OrderManagement() {
-  const { orders, payments, updateOrderStatus, verifyPayment, currentUser } = useApp();
+  const { orders, payments, updateOrderStatus, verifyPayment, currentUser, dbLoaded, clearAllData } = useApp();
+
+  if (!dbLoaded) {
+    return (
+      <DashboardLayout userName={currentUser?.name || 'Operador'} userRole="operator">
+        <div className="text-center py-24">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#FF1744] mx-auto mb-4" />
+          <p className="text-[#A0A0A0]">Cargando gestión de pedidos...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
@@ -81,7 +92,6 @@ export function OrderManagement() {
       'Fecha Creacion',
       'Prioridad',
       'Metodo Entrega',
-      'Material',
       'Color'
     ];
 
@@ -100,7 +110,6 @@ export function OrderManagement() {
       order.createdAt,
       order.priority,
       order.deliveryMethod,
-      order.specifications?.material || '',
       order.specifications?.color || ''
     ]);
 
@@ -245,6 +254,9 @@ export function OrderManagement() {
               <Download className="w-4 h-4" />
               Exportar
             </Button>
+            <Button variant="outline" className="border-red-500/40 text-red-400 hover:bg-red-500/10" onClick={clearAllData}>
+              Limpiar Todo
+            </Button>
           </div>
         </div>
 
@@ -335,7 +347,7 @@ export function OrderManagement() {
                     <td className="px-6 py-4 text-white text-sm">{order.customerName}</td>
                     <td className="px-6 py-4 text-white text-sm">
                       {order.productName}
-                      <p className="text-[#A0A0A0] text-xs">Prioridad: {order.priority}</p>
+                      <p className="text-[#A0A0A0] text-xs">Prioridad: {order.priority === 'high' ? 'Alta' : order.priority === 'medium' ? 'Media' : 'Baja'}</p>
                     </td>
                     <td className="px-6 py-4"><OrderStatusBadge status={order.status} /></td>
                     <td className="px-6 py-4"><PaymentStatusBadge status={order.paymentStatus} /></td>
@@ -379,7 +391,7 @@ export function OrderManagement() {
                 </div>
                 <div>
                   <p className="text-xs text-[#A0A0A0]">Prioridad</p>
-                  <span className="capitalize">{selectedOrder.priority}</span>
+                  <span>{selectedOrder.priority === 'high' ? 'Alta' : selectedOrder.priority === 'medium' ? 'Media' : 'Baja'}</span>
                 </div>
               </div>
 
@@ -403,7 +415,6 @@ export function OrderManagement() {
               <div className="space-y-2">
                 <h4 className="font-semibold text-white">Especificaciones técnicas:</h4>
                 <div className="p-3 bg-[#151515] rounded-xl border border-[rgba(255,255,255,0.08)] space-y-1.5 text-xs text-[#A0A0A0]">
-                  {selectedOrder.specifications?.material && <p>Material: <span className="text-white">{selectedOrder.specifications.material}</span></p>}
                   {selectedOrder.specifications?.color && <p>Color: <span className="text-white">{selectedOrder.specifications.color}</span></p>}
                   {selectedOrder.specifications?.notes && <p>Notas: <span className="text-white">{selectedOrder.specifications.notes}</span></p>}
                   {selectedOrder.specifications?.pieceType && <p>Tipo de Pieza: <span className="text-white">{selectedOrder.specifications.pieceType}</span></p>}
@@ -501,7 +512,34 @@ export function OrderManagement() {
                         <p className="text-[#A0A0A0]">Tipo de Pago: <span className="text-white font-medium">{pendingPayment.type === 'deposit' ? 'Seña (50%)' : 'Saldo Restante'}</span></p>
                         <p className="text-[#A0A0A0]">Monto Cargado: <span className="text-white font-medium">{formatCurrency(pendingPayment.amount)}</span></p>
                         <p className="text-[#A0A0A0]">Método: <span className="text-white font-medium">{pendingPayment.method}</span></p>
-                        <p className="text-[#A0A0A0]">Comprobante: <span className="text-[#FF1744] underline font-medium cursor-pointer" onClick={() => alert(`Descargando comprobante: ${pendingPayment.receiptUrl}`)}>{pendingPayment.receiptUrl}</span></p>
+                        <p className="text-[#A0A0A0]">Comprobante: 
+                          <a
+                            href={pendingPayment.receiptUrl.startsWith('data:') ? pendingPayment.receiptUrl : '#'}
+                            download={pendingPayment.receiptUrl.startsWith('data:') ? `comprobante_${pendingPayment.type}_${selectedOrder.id}.${getExtensionFromDataUrl(pendingPayment.receiptUrl)}` : undefined}
+                            onClick={(e) => {
+                              if (!pendingPayment.receiptUrl.startsWith('data:')) {
+                                e.preventDefault();
+                                const dataUrl = generatePlaceholderReceipt(
+                                  selectedOrder.id,
+                                  pendingPayment.type,
+                                  pendingPayment.amount,
+                                  pendingPayment.method,
+                                  pendingPayment.date,
+                                  pendingPayment.receiptUrl
+                                );
+                                const element = document.createElement('a');
+                                element.href = dataUrl;
+                                element.download = `comprobante_${pendingPayment.type}_${selectedOrder.id}.png`;
+                                document.body.appendChild(element);
+                                element.click();
+                                document.body.removeChild(element);
+                              }
+                            }}
+                            className="text-[#FF1744] underline font-medium cursor-pointer ml-1"
+                          >
+                            {pendingPayment.receiptUrl.startsWith('data:') ? 'Descargar Archivo' : pendingPayment.receiptUrl}
+                          </a>
+                        </p>
                       </div>
                       <div className="flex gap-2 pt-2">
                         <Button size="sm" variant="primary" className="bg-[#4ADE80] hover:bg-[#22C55E]" onClick={() => handleApprovePayment(pendingPayment.type)}>Aprobar Pago</Button>
@@ -518,6 +556,21 @@ export function OrderManagement() {
                 {selectedOrder.status === 'in_production' && (
                   <Button size="sm" variant="primary" onClick={() => handleStatusChange('finished')}>
                     Marcar como Finalizado (RF05)
+                  </Button>
+                )}
+                {selectedOrder.status === 'finished' && (
+                  <Button size="sm" variant="primary" className="bg-[#4ADE80] hover:bg-[#22C55E]" onClick={() => {
+                    verifyPayment(selectedOrder.id, 'final', 'approve');
+                    setSelectedOrder(prev => prev ? {
+                      ...prev,
+                      status: 'delivered',
+                      depositPaid: prev.totalPrice,
+                      remainingBalance: 0,
+                      paymentStatus: 'completed'
+                    } : null);
+                    toast.success('Pago de saldo aprobado y pedido entregado.');
+                  }}>
+                    Aprobar Pago de Saldo y Entregar
                   </Button>
                 )}
                 {selectedOrder.status !== 'delivered' && selectedOrder.status !== 'cancelled' && (

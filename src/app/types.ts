@@ -107,6 +107,7 @@ export interface Quotation {
   renderUrl?: string;
   imageUrl?: string;
   model3DUrl?: string;
+  attachments?: { name: string; dataUrl: string; type: string }[]; // operator files sent with quotation
   validUntil: string; // 7 days validity
 }
 

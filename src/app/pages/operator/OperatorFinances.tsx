@@ -3,7 +3,7 @@ import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { CreditCard, Download, Search, DollarSign } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { formatCurrency, formatDate } from '../../lib/utils';
+import { formatCurrency, formatDate, generatePlaceholderReceipt, getExtensionFromDataUrl } from '../../lib/utils';
 import { PaymentStatusBadge } from '../../components/ui/Badge';
 
 export function OperatorFinances() {
@@ -139,20 +139,32 @@ export function OperatorFinances() {
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-1.5">
                           {orderPayments.length > 0 ? (
-                            orderPayments.map((p) => (
-                              <a
-                                key={p.id}
-                                href="#"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  alert(`Descargando comprobante de ${p.type === 'deposit' ? 'seña' : 'saldo'} para el pedido ${order.id}`);
-                                }}
-                                className="inline-flex items-center gap-1 text-xs text-[#FF1744] hover:underline"
-                              >
-                                <Download className="w-3 h-3" />
-                                {p.type === 'deposit' ? 'Comprobante Seña' : 'Comprobante Saldo'}
-                              </a>
-                            ))
+                             orderPayments.map((p) => {
+                              const ext = getExtensionFromDataUrl(p.receiptUrl);
+                              return (
+                                <a
+                                  key={p.id}
+                                  href={p.receiptUrl.startsWith('data:') ? p.receiptUrl : '#'}
+                                  download={`comprobante_${p.type}_${order.id}.${ext}`}
+                                  onClick={(e) => {
+                                    if (!p.receiptUrl.startsWith('data:')) {
+                                      e.preventDefault();
+                                      const dataUrl = generatePlaceholderReceipt(order.id, p.type, p.amount, p.method, p.date, p.receiptUrl);
+                                      const element = document.createElement('a');
+                                      element.href = dataUrl;
+                                      element.download = `comprobante_${p.type}_${order.id}.png`;
+                                      document.body.appendChild(element);
+                                      element.click();
+                                      document.body.removeChild(element);
+                                    }
+                                  }}
+                                  className="inline-flex items-center gap-1 text-xs text-[#FF1744] hover:underline cursor-pointer"
+                                >
+                                  <Download className="w-3 h-3" />
+                                  {p.type === 'deposit' ? 'Comprobante Seña' : 'Comprobante Saldo'}
+                                </a>
+                              );
+                            })
                           ) : (
                             <span className="text-xs text-[#A0A0A0] italic">Sin comprobantes</span>
                           )}

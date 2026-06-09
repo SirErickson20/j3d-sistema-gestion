@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router';
 import { ClientLanding } from './pages/client/ClientLanding';
 import { OrderTracking } from './pages/client/OrderTracking';
 import { OperatorDashboard } from './pages/operator/OperatorDashboard';
+import { OperatorHome } from './pages/operator/OperatorHome';
 import { ProductionBoard } from './pages/operator/ProductionBoard';
 import { OrderManagement } from './pages/operator/OrderManagement';
 import { QuotationBuilder } from './pages/operator/QuotationBuilder';
@@ -35,7 +36,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/admin',
-    element: <OperatorDashboard />,
+    element: <OperatorHome />,
   },
   {
     path: '/admin/orders',

@@ -25,12 +25,12 @@ export function Sidebar({ userRole }: SidebarProps) {
   const { logout } = useApp();
 
   const clientLinks = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+    { icon: LayoutDashboard, label: 'Inicio', path: '/' },
     { icon: Package, label: 'Catálogo', path: '/client/catalog' },
   ];
 
   const operatorLinks = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
+    { icon: LayoutDashboard, label: 'Inicio', path: '/admin' },
     { icon: ShoppingCart, label: 'Pedidos', path: '/admin/orders' },
     { icon: Calculator, label: 'Cotizaciones', path: '/admin/quotations' },
     { icon: Boxes, label: 'Producción', path: '/admin/production' },

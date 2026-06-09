@@ -25,7 +25,8 @@ import {
   HelpCircle,
   Truck,
   Store,
-  ExternalLink
+  ExternalLink,
+  Instagram
 } from 'lucide-react';
 
 export function ClientLanding() {
@@ -145,9 +146,22 @@ export function ClientLanding() {
     );
 
     setCreatedOrderCode(newOrder.id);
-    setIsCatalogModalOpen(false);
     setIsSuccessModalOpen(true);
-    toast.success('¡Pedido de catálogo solicitado exitosamente!');
+
+    // Simular el envío de correo silencioso al Gmail del cliente
+    console.log(`%c[SIMULACIÓN EMAIL] Correo enviado exitosamente a ${catalogEmail} con el código de seguimiento: ${newOrder.id}`, 'color: #22c55e; font-weight: bold;');
+
+    // Reset fields
+    setCatalogQty(1);
+    setCatalogMaterial('PLA');
+    setCatalogColor('Blanco');
+    setCatalogDelivery('pickup');
+    setCatalogAddress('');
+    setCatalogNotes('');
+    setCatalogName('');
+    setCatalogEmail('');
+    setCatalogPhone('');
+    setIsCatalogModalOpen(false);
   };
 
   // File Upload with validation (format & size)
@@ -258,7 +272,9 @@ export function ClientLanding() {
 
       setCreatedOrderCode(newOrder.id);
       setIsSuccessModalOpen(true);
-      toast.success('¡Pedido personalizado enviado a cotización!');
+
+      // Simular el envío de correo silencioso al Gmail del cliente
+      console.log(`%c[SIMULACIÓN EMAIL] Correo enviado exitosamente a ${customEmail} con el código de seguimiento: ${newOrder.id}`, 'color: #22c55e; font-weight: bold;');
 
       // Reset Form
       setCustomName('');
@@ -391,7 +407,7 @@ export function ClientLanding() {
           </h2>
 
           <p className="text-[#8888aa] text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-            Elegí tus vasos térmicos, llaveros promocionales o medallas personalizadas directamente desde nuestro catálogo estándar o cargá tu archivo STL para cotizar un diseño único.
+            Elegí tus vasos térmicos, llaveros promocionales o medallas personalizadas directamente desde nuestro catálogo estándar o cargá tu diseño para cotizar una pieza única.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
@@ -563,46 +579,16 @@ export function ClientLanding() {
 
       {/* CUSTOM ORDERS SECTION */}
       <section id="personalizado" className="py-20 bg-[#14141c]/50 border-y border-white/5">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-5 gap-12 items-start">
+        <div className="max-w-3xl mx-auto px-6 space-y-8">
           
-          {/* Custom Promo sidebar */}
-          <div className="lg:col-span-2 space-y-6 lg:sticky lg:top-24">
-            <div className="inline-flex items-center gap-2 bg-[#7c3aed]/10 border border-[#7c3aed]/30 text-[#a78bfa] text-xs font-semibold uppercase tracking-widest px-4 py-1.5 rounded-full">
-              ✦ Sección Especial
-            </div>
-            
-            <h2 className="text-white font-extrabold text-4xl sm:text-5xl font-['Bebas_Neue',_sans-serif] tracking-wider leading-none">
-              CREÁ TU PEDIDO<br />
-              <span className="text-[#7c3aed]">PERSONALIZADO</span>
+          <div className="text-center space-y-2">
+            <h2 className="text-white font-extrabold text-4xl sm:text-5xl font-['Bebas_Neue',_sans-serif] tracking-wider uppercase">
+              Crea tu producto <span className="text-[#7c3aed]">personalizado</span>
             </h2>
-
-            <p className="text-[#8888aa] text-sm leading-relaxed max-w-md">
-              ¿Tenés un diseño propio en STL o necesitás una pieza a medida? Completá el formulario, adjuntá tus planos o archivos y calculá tu presupuesto aproximado al instante.
-            </p>
-
-            <div className="space-y-3 pt-2">
-              {[
-                'Subí tu archivo STL, OBJ, STEP o planos',
-                'Elegí el material (PLA, ABS, Resina, Nylon)',
-                'Calculá una estimación de costo en tiempo real',
-                'Presupuesto definitivo confirmado en menos de 24h'
-              ].map((text, idx) => (
-                <div key={idx} className="flex items-center gap-3 text-xs text-[#8888aa]">
-                  <span className="w-5 h-5 rounded-full bg-[#7c3aed]/10 border border-[#7c3aed]/30 flex items-center justify-center text-[#a78bfa] font-bold">
-                    ✓
-                  </span>
-                  <span>{text}</span>
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* Custom order form card */}
-          <div className="lg:col-span-3 bg-[#16161f] border border-white/5 rounded-2xl p-6 sm:p-8 shadow-2xl relative">
-            <h3 className="text-white text-lg font-bold mb-6 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-[#7c3aed]" />
-              Formulario de Pedido Especial
-            </h3>
+          <div className="bg-[#16161f] border border-white/5 rounded-2xl p-6 sm:p-8 shadow-2xl relative">
 
             <form onSubmit={handleCustomSubmit} className="space-y-6">
               
@@ -740,36 +726,6 @@ export function ClientLanding() {
                 )}
               </div>
 
-              {/* Material Grid */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-extrabold text-[#8888aa] uppercase tracking-widest block">Material sugerido</label>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-                  {[
-                    { id: 'PLA', icon: '🟢', label: 'PLA', mult: 1.0, desc: 'Estándar' },
-                    { id: 'ABS', icon: '⚫', label: 'ABS', mult: 1.3, desc: 'Resistente' },
-                    { id: 'PETG', icon: '🔵', label: 'PETG', mult: 1.8, desc: 'Flexible' },
-                    { id: 'Resina', icon: '⚪', label: 'Resina', mult: 2.5, desc: 'Detallado' },
-                    { id: 'Nylon', icon: '✨', label: 'Nylon', mult: 3.0, desc: 'Industrial' }
-                  ].map((mat) => (
-                    <div
-                      key={mat.id}
-                      onClick={() => {
-                        setCustomMaterial(mat.id);
-                        setCustomMaterialMult(mat.mult);
-                      }}
-                      className={`mat-card-pulse p-2.5 bg-[#1c1c28] border rounded-xl text-center cursor-pointer flex flex-col justify-center items-center ${
-                        customMaterial === mat.id
-                          ? 'border-[#7c3aed] bg-[#7c3aed]/10'
-                          : 'border-white/5 hover:border-white/20'
-                      }`}
-                    >
-                      <span className="text-lg mb-0.5">{mat.icon}</span>
-                      <span className="text-xs font-bold text-white block">{mat.label}</span>
-                      <span className="text-[8px] text-[#8888aa] block">{mat.desc}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
               {/* Swatch row & Finish grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -871,10 +827,10 @@ export function ClientLanding() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { step: '01', title: 'Completás el Formulario', desc: 'Elegís del catálogo o solicitás un pedido personalizado con tus datos de contacto y archivos STL.' },
-            { step: '02', title: 'Auditamos tu Pedido', desc: 'En menos de 24h revisamos los requerimientos y te enviamos la cotización con el render final.' },
-            { step: '03', title: 'Confirmás con la Seña', desc: 'Aceptás el presupuesto en la web y abonás el 50% de seña para dar inicio al encendido de las impresoras.' },
-            { step: '04', title: 'Entrega del Pedido', desc: 'Finalizada la producción y verificado el saldo restante, retirás por nuestro taller o te lo enviamos.' }
+            { step: '01', title: 'Completás tu Pedido', desc: 'Elegís un diseño de nuestro catálogo o nos mandás la foto o archivo del producto personalizado que querés hacer.' },
+            { step: '02', title: 'Revisamos tu Idea', desc: 'Revisamos lo que nos pediste y en menos de 24 horas te mandamos la cotización del producto.' },
+            { step: '03', title: 'Pagás la Seña (50%)', desc: 'Aceptás el presupuesto en nuestra web y abonás la mitad para que empecemos a fabricarlo.' },
+            { step: '04', title: 'Recibís tu Producto', desc: 'Una vez listo y pagado el total, lo retirás por nuestro taller o te lo enviamos a tu casa.' }
           ].map((s, idx) => (
             <div
               key={idx}
@@ -899,17 +855,17 @@ export function ClientLanding() {
             <h4 className="text-white font-extrabold text-xl font-['Bebas_Neue',_sans-serif] tracking-wider">
               J3D<span className="text-[#FF1744]"> IMPRESIONES</span>
             </h4>
-            <p className="text-xs text-[#8888aa]">📍 Buenos Aires, Argentina — © 2026 J3D. Todos los derechos reservados.</p>
+            <p className="text-xs text-[#8888aa]">📍 Los Alisos, Jujuy, Argentina — © 2026 J3D. Todos los derechos reservados.</p>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 text-xs text-[#8888aa]">
             <div className="flex items-center gap-1.5">
               <Mail className="w-4 h-4 text-[#FF1744]" />
-              <span>hola@j3d.com.ar</span>
+              <span>j3d@gmail.com</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Phone className="w-4 h-4 text-[#FF1744]" />
-              <span>+54 11 9876-5432</span>
+              <Instagram className="w-4 h-4 text-[#FF1744]" />
+              <span>j3d.arg</span>
             </div>
           </div>
         </div>
@@ -967,32 +923,16 @@ export function ClientLanding() {
             </div>
 
             {/* Order detail configurations */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-extrabold text-[#8888aa] uppercase tracking-widest">Cantidad</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={catalogQty}
-                  onChange={(e) => setCatalogQty(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-full px-3.5 py-2 bg-[#1c1c28] border border-white/5 rounded-xl text-xs text-white focus:outline-none"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-extrabold text-[#8888aa] uppercase tracking-widest">Material</label>
-                <select
-                  value={catalogMaterial}
-                  onChange={(e) => setCatalogMaterial(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#1c1c28] border border-white/5 rounded-xl text-xs text-white focus:outline-none focus:border-[#FF1744]"
-                >
-                  <option value="PLA">PLA</option>
-                  <option value="ABS">ABS</option>
-                  <option value="Resina">Resina</option>
-                  <option value="Nylon">Nylon</option>
-                </select>
-              </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-extrabold text-[#8888aa] uppercase tracking-widest">Cantidad</label>
+              <input
+                type="number"
+                min="1"
+                value={catalogQty}
+                onChange={(e) => setCatalogQty(Math.max(1, parseInt(e.target.value) || 1))}
+                className="w-full px-3.5 py-2 bg-[#1c1c28] border border-white/5 rounded-xl text-xs text-white focus:outline-none"
+                required
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -1104,6 +1044,7 @@ export function ClientLanding() {
         </Modal>
       )}
 
+
       {/* MODAL: SUCCESS DE PEDIDO CREADO */}
       <Modal
         isOpen={isSuccessModalOpen}
@@ -1130,8 +1071,8 @@ export function ClientLanding() {
           <div className="p-3 bg-[#1c1c28] border border-white/5 rounded-xl text-left text-xs text-[#8888aa] space-y-1">
             <span className="font-bold text-white block mb-0.5">📌 ¿Cuáles son los próximos pasos?</span>
             <p>1. Ingresá a la pantalla de seguimiento del pedido.</p>
-            <p>2. Si es de catálogo, podrás realizar la transferencia del 50% y subir el comprobante de seña.</p>
-            <p>3. Si es personalizado, esperá que el operador cotice tu diseño y suba el render en menos de 24h.</p>
+            <p>2. Si es de catálogo, podés pagar la seña del 50% y subir el comprobante en la web.</p>
+            <p>3. Si es personalizado, esperá que revisemos tu idea y te enviemos la cotización del producto en menos de 24 horas.</p>
           </div>
 
           <div className="flex justify-center gap-3 pt-2">
@@ -1158,6 +1099,7 @@ export function ClientLanding() {
           </div>
         </div>
       </Modal>
+
     </div>
   );
 }
