@@ -37,7 +37,7 @@ export function ClientLanding() {
   const [trackingSearch, setTrackingSearch] = useState('');
 
   // Catalog tab filtering state
-  const [selectedTab, setSelectedTab] = useState<'all' | 'Vasos' | 'Llaveros'>('all');
+  const [selectedTab, setSelectedTab] = useState<'all' | 'Vasos' | 'Llaveros' | 'Medallas'>('all');
 
   // Catalog order checkout modal state
   const [isCatalogModalOpen, setIsCatalogModalOpen] = useState(false);
@@ -443,19 +443,15 @@ export function ClientLanding() {
               { icon: '🥤', name: 'Vaso Chopp River', price: '$10.000' },
               { icon: '🔑', name: 'Llavero CARP River', price: '$1.200' },
               { icon: '🥤', name: 'Vaso Chopp GyE', price: '$10.000' },
-              { icon: '🥤', name: 'Mate Stitch J3D', price: '$15.000' },
-              { icon: '🥤', name: 'Vaso Chopp River', price: '$10.000' },
-              { icon: '🔑', name: 'Llavero CARP River', price: '$1.200' },
-              { icon: '🥤', name: 'Vaso Chopp GyE', price: '$10.000' },
+              { icon: '🥤', name: 'Mate Capibara J3D', price: '$12.000' },
+              { icon: '🏆', name: 'Medalla Laureano', price: '$1.200' },
               // Duplicate set
               { icon: '🥤', name: 'Mate Stitch J3D', price: '$15.000' },
               { icon: '🥤', name: 'Vaso Chopp River', price: '$10.000' },
               { icon: '🔑', name: 'Llavero CARP River', price: '$1.200' },
               { icon: '🥤', name: 'Vaso Chopp GyE', price: '$10.000' },
-              { icon: '🥤', name: 'Mate Stitch J3D', price: '$15.000' },
-              { icon: '🥤', name: 'Vaso Chopp River', price: '$10.000' },
-              { icon: '🔑', name: 'Llavero CARP River', price: '$1.200' },
-              { icon: '🥤', name: 'Vaso Chopp GyE', price: '$10.000' }
+              { icon: '🥤', name: 'Mate Capibara J3D', price: '$12.000' },
+              { icon: '🏆', name: 'Medalla Laureano', price: '$1.200' }
             ].map((item, index) => (
               <div
                 key={index}
@@ -491,7 +487,8 @@ export function ClientLanding() {
           {[
             { id: 'all', label: 'Todos los productos' },
             { id: 'Vasos', label: '🥤 Vasos y Mates' },
-            { id: 'Llaveros', label: '🔑 Llaveros' }
+            { id: 'Llaveros', label: '🔑 Llaveros' },
+            { id: 'Medallas', label: '🏆 Medallas' }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -512,8 +509,8 @@ export function ClientLanding() {
           {filteredProducts.map((product) => {
             // Pick catalog icon emoji based on category
             const emoji = product.category === 'Vasos' ? '🥤' : product.category === 'Llaveros' ? '🔑' : '🏆';
-            const badgeText = product.id === 'p1' ? 'Popular' : product.id === 'p2' ? 'Nuevo' : 'Promo';
-            const badgeColor = product.id === 'p1' ? 'bg-[#f97316]' : product.id === 'p2' ? 'bg-[#22c55e]' : 'bg-[#7c3aed]';
+            const badgeText = product.id === 'p1' ? 'Popular' : (product.id === 'p2' || product.id === 'p5' || product.id === 'p6') ? 'Nuevo' : 'Promo';
+            const badgeColor = badgeText === 'Popular' ? 'bg-[#f97316]' : badgeText === 'Nuevo' ? 'bg-[#22c55e]' : 'bg-[#7c3aed]';
 
             return (
               <Card
@@ -545,18 +542,6 @@ export function ClientLanding() {
                     <p className="text-[10px] font-extrabold text-[#8888aa] uppercase tracking-widest">{product.category}</p>
                     <h3 className="text-white text-lg font-bold group-hover:text-[#FF1744] transition-colors">{product.name}</h3>
                     <p className="text-[#8888aa] text-xs leading-relaxed line-clamp-2">{product.description}</p>
-                  </div>
-
-                  {/* Tech specs */}
-                  <div className="flex items-center gap-4 text-xs text-[#8888aa] pt-2">
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-[#FF1744]" />
-                      <span>{product.printTime}h Impresión</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Layers className="w-3.5 h-3.5 text-[#FF1744]" />
-                      <span>{product.material}</span>
-                    </div>
                   </div>
 
                   {/* Price & CTA */}

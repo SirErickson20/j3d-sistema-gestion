@@ -55,6 +55,26 @@ export const products: Product[] = [
     printTime: 3,
     material: 'PLA',
   },
+  {
+    id: 'p5',
+    name: 'Mate 3D Capibara',
+    description: 'Mate coleccionable con forma de Capibara. Impreso en 3D con alta fidelidad y excelentes terminaciones.',
+    category: 'Vasos',
+    basePrice: 12000,
+    image: '/images/mate_capibara.jpg',
+    printTime: 4,
+    material: 'PLA',
+  },
+  {
+    id: 'p6',
+    name: 'Medalla Personalizada (Laureano)',
+    description: 'Medalla conmemorativa de cumpleaños con diseño de la Copa del Mundo y bandera argentina, personalizada con relieve.',
+    category: 'Medallas',
+    basePrice: 1200,
+    image: '/images/medalla_cumple.jpg',
+    printTime: 2,
+    material: 'PLA',
+  },
 ];
 
 export const materials: Material[] = [
