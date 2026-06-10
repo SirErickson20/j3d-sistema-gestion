@@ -38,6 +38,7 @@ export function OrderStatusBadge({ status }: { status: OrderStatus }) {
     pending_deposit: { label: 'Pendiente de Seña', variant: 'warning' },
     deposit_verification: { label: 'Seña Pendiente de Verificación', variant: 'warning' },
     in_production: { label: 'En Producción', variant: 'info' },
+    pending_balance: { label: 'Pendiente de Saldo', variant: 'warning' },
     finished: { label: 'Finalizado', variant: 'success' },
     balance_verification: { label: 'Saldo Pendiente de Verificación', variant: 'warning' },
     delivered: { label: 'Entregado', variant: 'success' },

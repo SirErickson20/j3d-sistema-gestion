@@ -173,7 +173,7 @@ export function OrderManagement() {
       if (!prev) return null;
       const depositVal = type === 'deposit' ? prev.totalPrice * 0.5 : prev.depositPaid;
       const remainVal = type === 'deposit' ? prev.totalPrice * 0.5 : 0;
-      const statusVal = type === 'deposit' ? 'in_production' : 'delivered';
+      const statusVal = type === 'deposit' ? 'in_production' : 'finished';
       const payStatusVal = type === 'deposit' ? 'partial' : 'completed';
       return {
         ...prev,
@@ -197,7 +197,7 @@ export function OrderManagement() {
     verifyPayment(selectedOrder.id, type, 'reject', rejectPaymentReason);
     setSelectedOrder(prev => {
       if (!prev) return null;
-      const statusVal = type === 'deposit' ? 'pending_deposit' : 'finished';
+      const statusVal = type === 'deposit' ? 'pending_deposit' : 'pending_balance';
       return {
         ...prev,
         status: statusVal
@@ -554,23 +554,30 @@ export function OrderManagement() {
               {/* Sequential Status Transitions Row */}
               <div className="flex flex-wrap gap-2 pt-4 border-t border-[rgba(255,255,255,0.08)]">
                 {selectedOrder.status === 'in_production' && (
-                  <Button size="sm" variant="primary" onClick={() => handleStatusChange('finished')}>
-                    Marcar como Finalizado (RF05)
+                  <Button size="sm" variant="primary" onClick={() => handleStatusChange('pending_balance')}>
+                    Finalizar Producción (Pte. Saldo)
                   </Button>
                 )}
-                {selectedOrder.status === 'finished' && (
+                {selectedOrder.status === 'pending_balance' && (
                   <Button size="sm" variant="primary" className="bg-[#4ADE80] hover:bg-[#22C55E]" onClick={() => {
                     verifyPayment(selectedOrder.id, 'final', 'approve');
                     setSelectedOrder(prev => prev ? {
                       ...prev,
-                      status: 'delivered',
+                      status: 'finished',
                       depositPaid: prev.totalPrice,
                       remainingBalance: 0,
                       paymentStatus: 'completed'
                     } : null);
-                    toast.success('Pago de saldo aprobado y pedido entregado.');
+                    toast.success('Pago de saldo aprobado. Pedido Finalizado.');
                   }}>
-                    Aprobar Pago de Saldo y Entregar
+                    Aprobar Pago de Saldo (Finalizado)
+                  </Button>
+                )}
+                {selectedOrder.status === 'finished' && (
+                  <Button size="sm" variant="primary" className="bg-[#3b82f6] hover:bg-[#2563eb]" onClick={() => {
+                    handleStatusChange('delivered');
+                  }}>
+                    Registrar Entrega Física (Entregado)
                   </Button>
                 )}
                 {selectedOrder.status !== 'delivered' && selectedOrder.status !== 'cancelled' && (

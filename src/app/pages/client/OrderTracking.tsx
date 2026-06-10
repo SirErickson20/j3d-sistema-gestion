@@ -30,6 +30,7 @@ const statusTimeline: { status: OrderStatus; label: string; icon: any }[] = [
   { status: 'pending_approval', label: 'En Rediseño', icon: Clock },
   { status: 'pending_deposit', label: 'Pendiente de Seña', icon: DollarSign },
   { status: 'in_production', label: 'En Producción', icon: Package },
+  { status: 'pending_balance', label: 'Pendiente de Saldo', icon: DollarSign },
   { status: 'finished', label: 'Finalizado', icon: CheckCircle },
   { status: 'delivered', label: 'Entregado', icon: CheckCircle },
 ];
@@ -107,7 +108,7 @@ export function OrderTracking() {
   if (order.status === 'deposit_verification') {
     timelineStatus = 'pending_deposit';
   } else if (order.status === 'balance_verification') {
-    timelineStatus = 'finished';
+    timelineStatus = 'pending_balance';
   }
 
   let currentStatusIndex = statusTimeline.findIndex((s) => s.status === timelineStatus);
@@ -372,7 +373,7 @@ export function OrderTracking() {
                     </div>
                   </div>
 
-                  {order.status !== 'delivered' && (
+                  {order.status !== 'delivered' && order.status !== 'finished' && order.status !== 'cancelled' && (
                     <Button variant="outline" size="sm" className="border-red-500/30 text-red-400 hover:bg-red-500/10" onClick={() => setIsCancelModalOpen(true)}>
                       Cancelar Pedido
                     </Button>
@@ -602,7 +603,7 @@ export function OrderTracking() {
               )}
 
               {/* Saldo Payment Form */}
-              {order.status === 'finished' && (
+              {order.status === 'pending_balance' && (
                 <form onSubmit={(e) => handlePaymentSubmit(e, 'final')} className="pt-4 border-t border-[rgba(255,255,255,0.08)] space-y-3">
                   <div className="p-3 bg-[#151515] rounded-xl border border-[rgba(255,23,68,0.2)] text-xs space-y-1.5">
                     <p className="font-semibold text-white">Información de Transferencia para Saldo Restante (50%):</p>
@@ -659,6 +660,17 @@ export function OrderTracking() {
                   </p>
                   <p className="text-[10px] text-[#A0A0A0] mt-1">
                     Comprobante de saldo enviado. El operador lo verificará a la brevedad para proceder con la entrega del pedido.
+                  </p>
+                </div>
+              )}
+
+              {order.status === 'finished' && (
+                <div className="p-3 bg-[rgba(74,222,128,0.1)] border border-[rgba(74,222,128,0.2)] rounded-lg text-center">
+                  <p className="text-xs text-[#4ADE80] font-medium">
+                    Pedido Finalizado (Listo para Retirar/Enviar)
+                  </p>
+                  <p className="text-[10px] text-[#A0A0A0] mt-1">
+                    El pago del saldo ha sido validado con éxito. El producto está listo y empaquetado para su retiro en taller o envío.
                   </p>
                 </div>
               )}

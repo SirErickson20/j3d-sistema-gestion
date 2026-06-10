@@ -9,6 +9,7 @@ export type OrderStatus =
   | 'pending_deposit'   // Pendiente de Seña
   | 'deposit_verification' // Seña Pendiente de Verificación
   | 'in_production'     // En Producción
+  | 'pending_balance'   // Pendiente de Saldo
   | 'finished'          // Finalizado
   | 'balance_verification' // Saldo Pendiente de Verificación
   | 'delivered'         // Entregado

@@ -653,7 +653,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const newDeposit = type === 'deposit' ? paidAmount : o.depositPaid + paidAmount;
         const newRemaining = o.totalPrice - newDeposit;
         
-        let newStatus: OrderStatus = type === 'deposit' ? 'in_production' : 'delivered';
+        let newStatus: OrderStatus = type === 'deposit' ? 'in_production' : 'finished';
         let newPaymentStatus: PaymentStatus = type === 'deposit' ? 'partial' : 'completed';
 
         return {
@@ -671,7 +671,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         };
       } else {
         // Reject payment receipt, return to initial state
-        const targetStatus: OrderStatus = type === 'deposit' ? 'pending_deposit' : 'finished';
+        const targetStatus: OrderStatus = type === 'deposit' ? 'pending_deposit' : 'pending_balance';
         return {
           ...o,
           status: targetStatus,

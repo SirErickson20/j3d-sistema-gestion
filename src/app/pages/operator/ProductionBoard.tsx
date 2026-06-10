@@ -13,12 +13,18 @@ const getAllowedNextStatuses = (current: OrderStatus): { value: OrderStatus; lab
     case 'in_production':
       return [
         { value: 'in_production', label: 'En Producción' },
-        { value: 'finished', label: 'Terminado' },
+        { value: 'pending_balance', label: 'Listo (Pte. Saldo)' },
+        { value: 'cancelled', label: 'Cancelar' }
+      ];
+    case 'pending_balance':
+      return [
+        { value: 'pending_balance', label: 'Pendiente de Saldo' },
+        { value: 'finished', label: 'Aprobar Pago (Finalizado)' },
         { value: 'cancelled', label: 'Cancelar' }
       ];
     case 'finished':
       return [
-        { value: 'finished', label: 'Terminado' },
+        { value: 'finished', label: 'Finalizado' },
         { value: 'delivered', label: 'Entregado' },
         { value: 'cancelled', label: 'Cancelar' }
       ];
@@ -47,7 +53,7 @@ const getAllowedNextStatuses = (current: OrderStatus): { value: OrderStatus; lab
     case 'balance_verification':
       return [
         { value: 'balance_verification', label: 'Saldo por Verificar' },
-        { value: 'delivered', label: 'Entregado' },
+        { value: 'finished', label: 'Aprobar Pago (Finalizado)' },
         { value: 'cancelled', label: 'Cancelar' }
       ];
     case 'delivered':
@@ -153,9 +159,17 @@ export function ProductionBoard() {
                         <p className="text-[11px] text-white font-medium truncate" title={order.productName}>
                           {order.productName}
                         </p>
-                        {(order.status === 'deposit_verification' || order.status === 'balance_verification') && (
-                          <div className="mt-1 px-1.5 py-0.5 rounded bg-[rgba(251,191,36,0.1)] border border-[rgba(251,191,36,0.2)] text-[#FCD34D] text-[8px] font-bold uppercase tracking-wider inline-block">
-                            {order.status === 'deposit_verification' ? 'Verificar Seña' : 'Verificar Saldo'}
+                        {(order.status === 'deposit_verification' || order.status === 'balance_verification' || order.status === 'pending_balance') && (
+                          <div className={`mt-1 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider inline-block ${
+                            order.status === 'pending_balance'
+                              ? 'bg-[rgba(255,23,68,0.1)] border border-[rgba(255,23,68,0.2)] text-[#FF1744]'
+                              : 'bg-[rgba(251,191,36,0.1)] border border-[rgba(251,191,36,0.2)] text-[#FCD34D]'
+                          }`}>
+                            {order.status === 'deposit_verification'
+                              ? 'Verificar Seña'
+                              : order.status === 'balance_verification'
+                              ? 'Verificar Saldo'
+                              : 'Esperando Saldo'}
                           </div>
                         )}
                       </div>
