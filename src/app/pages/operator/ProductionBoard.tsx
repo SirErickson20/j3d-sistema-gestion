@@ -71,7 +71,8 @@ const columns: { id: OrderStatus; label: string; color: string }[] = [
   { id: 'pending_approval', label: 'En Rediseño', color: '#FCD34D' },
   { id: 'pending_deposit', label: 'Pendiente Seña', color: '#F87171' },
   { id: 'in_production', label: 'Producción', color: '#FF1744' },
-  { id: 'finished', label: 'Terminado', color: '#4ADE80' },
+  { id: 'pending_balance', label: 'Pte. Saldo', color: '#FB923C' },
+  { id: 'finished', label: 'Finalizado', color: '#4ADE80' },
   { id: 'delivered', label: 'Entregado', color: '#34D399' },
 ];
 
@@ -83,8 +84,8 @@ export function ProductionBoard() {
       if (status === 'pending_deposit') {
         return order.status === 'pending_deposit' || order.status === 'deposit_verification';
       }
-      if (status === 'finished') {
-        return order.status === 'finished' || order.status === 'balance_verification';
+      if (status === 'pending_balance') {
+        return order.status === 'pending_balance' || order.status === 'balance_verification';
       }
       return order.status === status;
     });
@@ -107,7 +108,7 @@ export function ProductionBoard() {
         </div>
 
         {/* Kanban Board Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-3 pb-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-8 gap-2 pb-4">
           {columns.map((column) => {
             const columnOrders = getOrdersByStatus(column.id);
 
