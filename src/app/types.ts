@@ -16,6 +16,7 @@ export type OrderStatus =
   | 'cancelled';        // Cancelado
 
 export type PaymentStatus = 'pending' | 'partial' | 'completed';
+export type PaymentValidationStatus = 'pending_validation' | 'validated' | 'invalidated';
 
 export interface User {
   id: string;
@@ -116,10 +117,10 @@ export interface Payment {
   id: string;
   orderId: string;
   amount: number;
-  type: 'deposit' | 'final';
+  type: 'seña' | 'saldo';
   date: string;
   method: string;
-  status: 'pending' | 'completed';
+  status: PaymentValidationStatus;
   receiptUrl?: string; // proof file path/url
 }
 

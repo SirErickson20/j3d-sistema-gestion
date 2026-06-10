@@ -221,9 +221,9 @@ export const payments: Payment[] = [
     id: 'PAY-001',
     orderId: 'ORD-2026-001',
     amount: 12500,
-    type: 'deposit',
+    type: 'seña',
     date: '2026-06-02T10:00:00Z',
     method: 'Transferencia',
-    status: 'completed',
+    status: 'validated',
   },
 ];

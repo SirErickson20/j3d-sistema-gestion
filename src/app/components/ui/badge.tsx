@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { cn } from '../../lib/utils';
-import { OrderStatus, PaymentStatus } from '../../types';
+import { OrderStatus, PaymentStatus, PaymentValidationStatus } from '../../types';
 
 interface BadgeProps {
   children: ReactNode;
@@ -66,6 +66,23 @@ export function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
 
   return (
     <Badge variant={config.variant}>
+      {config.label}
+    </Badge>
+  );
+}
+
+export function PaymentValidationStatusBadge({ status }: { status: PaymentValidationStatus }) {
+  const statusConfig: Record<PaymentValidationStatus, { label: string; variant: BadgeProps['variant'] }> = {
+    pending_validation: { label: 'Pendiente de validación', variant: 'warning' },
+    validated: { label: 'Validado', variant: 'success' },
+    invalidated: { label: 'Invalidado', variant: 'danger' },
+  };
+
+  const config = statusConfig[status];
+
+  return (
+    <Badge variant={config.variant}>
+      <span className="w-1.5 h-1.5 rounded-full bg-current" />
       {config.label}
     </Badge>
   );

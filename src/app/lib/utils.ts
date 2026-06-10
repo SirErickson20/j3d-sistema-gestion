@@ -108,7 +108,7 @@ export function generatePlaceholderReceipt(orderId: string, type: string, amount
   };
 
   drawField('Pedido ID:', `#${orderId}`);
-  drawField('Tipo de Pago:', type === 'deposit' ? 'Seña (50%)' : 'Saldo Restante');
+  drawField('Tipo de Pago:', type === 'seña' ? 'Seña (50%)' : 'Saldo Restante');
   drawField('Monto:', formatCurrency(amount), true);
   drawField('Método:', method);
   drawField('Fecha:', formatDate(date));

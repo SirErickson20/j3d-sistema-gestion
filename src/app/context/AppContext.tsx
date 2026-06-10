@@ -19,8 +19,8 @@ interface AppContextType {
   requestQuotationModifications: (orderId: string, comments: string) => void;
   acceptQuotation: (orderId: string) => void;
   rejectQuotation: (orderId: string, reason: string) => void;
-  submitPaymentReceipt: (orderId: string, type: 'deposit' | 'final', method: string, receiptUrl: string) => void;
-  verifyPayment: (orderId: string, type: 'deposit' | 'final', action: 'approve' | 'reject', reason?: string) => void;
+  submitPaymentReceipt: (orderId: string, type: 'seña' | 'saldo', method: string, receiptUrl: string) => void;
+  verifyPayment: (orderId: string, type: 'seña' | 'saldo', action: 'approve' | 'reject', reason?: string) => void;
   clearAllData: () => void;
 }
 
@@ -550,7 +550,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // RF14 - Registro de Pagos (Client submits receipt)
   const submitPaymentReceipt = (
     orderId: string,
-    type: 'deposit' | 'final',
+    type: 'seña' | 'saldo',
     method: string,
     receiptUrl: string
   ) => {
@@ -560,7 +560,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const targetOrder = orders.find(o => o.id.replace(/_/g, '-').toUpperCase() === orderId.replace(/_/g, '-').toUpperCase());
     if (!targetOrder) return;
 
-    const amount = type === 'deposit' 
+    const amount = type === 'seña' 
       ? targetOrder.totalPrice * 0.5 
       : targetOrder.remainingBalance;
 
@@ -571,7 +571,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       type,
       date: now,
       method,
-      status: 'pending', // Pending operator verification
+      status: 'pending_validation', // Pending operator verification
       receiptUrl
     };
 
@@ -580,13 +580,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setOrders(prev => prev.map(o => {
       if (o.id !== orderId) return o;
 
-      const nextStatus = type === 'deposit' 
+      const nextStatus = type === 'seña' 
         ? 'deposit_verification'  // "Seña Pendiente de Verificación"
         : 'balance_verification';  // "Saldo Pendiente de Verificación"
 
       let estimatedDelivery = o.estimatedDelivery;
 
-      if (type === 'deposit') {
+      if (type === 'seña') {
         let totalPrintTime = 4; // default fallback
         
         if (o.productId) {
@@ -629,7 +629,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Operator verifies payment (RF14 approval or reject)
   const verifyPayment = (
     orderId: string,
-    type: 'deposit' | 'final',
+    type: 'seña' | 'saldo',
     action: 'approve' | 'reject',
     reason?: string
   ) => {
@@ -637,10 +637,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // 1. Update Payment record status
     setPayments(prev => prev.map(p => {
-      if (p.orderId !== orderId || p.type !== type || p.status !== 'pending') return p;
+      if (p.orderId !== orderId || p.type !== type || p.status !== 'pending_validation') return p;
       return {
         ...p,
-        status: action === 'approve' ? 'completed' : 'pending' // if reject, keep in state or cancel
+        status: action === 'approve' ? 'validated' : 'invalidated'
       };
     }));
 
@@ -650,11 +650,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       if (action === 'approve') {
         const paidAmount = o.totalPrice * 0.5;
-        const newDeposit = type === 'deposit' ? paidAmount : o.depositPaid + paidAmount;
+        const newDeposit = type === 'seña' ? paidAmount : o.depositPaid + paidAmount;
         const newRemaining = o.totalPrice - newDeposit;
         
-        let newStatus: OrderStatus = type === 'deposit' ? 'in_production' : 'finished';
-        let newPaymentStatus: PaymentStatus = type === 'deposit' ? 'partial' : 'completed';
+        let newStatus: OrderStatus = type === 'seña' ? 'in_production' : 'finished';
+        let newPaymentStatus: PaymentStatus = type === 'seña' ? 'partial' : 'completed';
 
         return {
           ...o,
@@ -671,7 +671,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         };
       } else {
         // Reject payment receipt, return to initial state
-        const targetStatus: OrderStatus = type === 'deposit' ? 'pending_deposit' : 'pending_balance';
+        const targetStatus: OrderStatus = type === 'seña' ? 'pending_deposit' : 'pending_balance';
         return {
           ...o,
           status: targetStatus,

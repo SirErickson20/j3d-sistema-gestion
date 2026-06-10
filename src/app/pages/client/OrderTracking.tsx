@@ -4,7 +4,7 @@ import html2pdf from 'html2pdf.js';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { OrderStatusBadge, PaymentStatusBadge } from '../../components/ui/Badge';
+import { OrderStatusBadge, PaymentStatusBadge, PaymentValidationStatusBadge } from '../../components/ui/Badge';
 import {
   Package,
   FileText,
@@ -45,6 +45,7 @@ export function OrderTracking() {
     requestQuotationModifications,
     updateOrderStatus,
     submitPaymentReceipt,
+    payments,
     currentUser,
     dbLoaded,
   } = useApp();
@@ -128,7 +129,7 @@ export function OrderTracking() {
     setCancelReason('');
   };
 
-  const handlePaymentSubmit = (e: React.FormEvent, type: 'deposit' | 'final') => {
+  const handlePaymentSubmit = (e: React.FormEvent, type: 'seña' | 'saldo') => {
     e.preventDefault();
     if (!receiptName.trim()) {
       toast.error('Por favor, ingrese el nombre o archivo del comprobante.');
@@ -535,7 +536,9 @@ export function OrderTracking() {
               )}
               {order.comments && (
                 <div className="p-3 bg-[rgba(251,191,36,0.05)] border border-[rgba(251,191,36,0.2)] rounded-lg">
-                  <p className="text-xs text-[#FCD34D] font-medium mb-0.5">Comentarios de Rediseño (Cliente)</p>
+                  <p className="text-xs text-[#FCD34D] font-medium mb-0.5">
+                    {order.status === 'pending_approval' ? 'Comentarios de Rediseño (Cliente)' : 'Observaciones / Motivo de Rechazo'}
+                  </p>
                   <p className="text-sm text-white">{order.comments}</p>
                 </div>
               )}
@@ -565,7 +568,7 @@ export function OrderTracking() {
 
               {/* Seña Payment Form */}
               {order.status === 'pending_deposit' && (
-                <form onSubmit={(e) => handlePaymentSubmit(e, 'deposit')} className="pt-4 border-t border-[rgba(255,255,255,0.08)] space-y-3">
+                <form onSubmit={(e) => handlePaymentSubmit(e, 'seña')} className="pt-4 border-t border-[rgba(255,255,255,0.08)] space-y-3">
                   <div className="p-3 bg-[#151515] rounded-xl border border-[rgba(255,23,68,0.2)] text-xs space-y-1.5">
                     <p className="font-semibold text-white">Información de Transferencia para Seña (50%):</p>
                     <p className="text-[#A0A0A0]">Alias de Pago: <span className="text-white font-bold">j3d.impresiones.mp</span></p>
@@ -604,7 +607,7 @@ export function OrderTracking() {
 
               {/* Saldo Payment Form */}
               {order.status === 'pending_balance' && (
-                <form onSubmit={(e) => handlePaymentSubmit(e, 'final')} className="pt-4 border-t border-[rgba(255,255,255,0.08)] space-y-3">
+                <form onSubmit={(e) => handlePaymentSubmit(e, 'saldo')} className="pt-4 border-t border-[rgba(255,255,255,0.08)] space-y-3">
                   <div className="p-3 bg-[#151515] rounded-xl border border-[rgba(255,23,68,0.2)] text-xs space-y-1.5">
                     <p className="font-semibold text-white">Información de Transferencia para Saldo Restante (50%):</p>
                     <p className="text-[#A0A0A0]">Alias de Pago: <span className="text-white font-bold">j3d.impresiones.mp</span></p>
@@ -685,6 +688,36 @@ export function OrderTracking() {
                   </p>
                 </div>
               )}
+
+              {/* Historial de Comprobantes */}
+              {(() => {
+                const orderPayments = payments.filter(p => p.orderId === order.id);
+                if (orderPayments.length > 0) {
+                  return (
+                    <div className="pt-4 border-t border-[rgba(255,255,255,0.08)] space-y-3">
+                      <p className="text-xs font-semibold text-white tracking-wider uppercase">Historial de Pagos Enviados</p>
+                      <div className="space-y-2">
+                        {orderPayments.map((p) => (
+                          <div key={p.id} className="flex flex-col sm:flex-row sm:items-center justify-between bg-[#151515] p-3 rounded-lg border border-[rgba(255,255,255,0.04)] gap-2">
+                            <div className="space-y-1">
+                              <p className="text-xs font-medium text-white capitalize">
+                                {p.type === 'seña' ? 'Seña' : 'Saldo'} — <span className="text-[#4ADE80] font-semibold">{formatCurrency(p.amount)}</span>
+                              </p>
+                              <p className="text-[10px] text-[#A0A0A0]">
+                                Método: {p.method} | Fecha: {new Date(p.date).toLocaleDateString('es-AR')}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 self-start sm:self-center">
+                              <PaymentValidationStatusBadge status={p.status} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
             </CardContent>
           </Card>
         </div>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { OrderStatusBadge, PaymentStatusBadge } from '../../components/ui/Badge';
+import { OrderStatusBadge, PaymentStatusBadge, PaymentValidationStatusBadge } from '../../components/ui/Badge';
 import {
   Search,
   Filter,
@@ -42,7 +42,7 @@ export function OrderManagement() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
-  const [paymentType, setPaymentType] = useState<'deposit' | 'final'>('deposit');
+  const [paymentType, setPaymentType] = useState<'seña' | 'saldo'>('seña');
   const [paymentMethod, setPaymentMethod] = useState('Transferencia');
   const [paymentReceiptName, setPaymentReceiptName] = useState('');
   const [isCancelOpen, setIsCancelOpen] = useState(false);
@@ -166,15 +166,15 @@ export function OrderManagement() {
     toast.success(`Estado del pedido actualizado a "${status}"`);
   };
 
-  const handleApprovePayment = (type: 'deposit' | 'final') => {
+  const handleApprovePayment = (type: 'seña' | 'saldo') => {
     if (!selectedOrder) return;
     verifyPayment(selectedOrder.id, type, 'approve');
     setSelectedOrder(prev => {
       if (!prev) return null;
-      const depositVal = type === 'deposit' ? prev.totalPrice * 0.5 : prev.depositPaid;
-      const remainVal = type === 'deposit' ? prev.totalPrice * 0.5 : 0;
-      const statusVal = type === 'deposit' ? 'in_production' : 'finished';
-      const payStatusVal = type === 'deposit' ? 'partial' : 'completed';
+      const depositVal = type === 'seña' ? prev.totalPrice * 0.5 : prev.depositPaid;
+      const remainVal = type === 'seña' ? prev.totalPrice * 0.5 : 0;
+      const statusVal = type === 'seña' ? 'in_production' : 'finished';
+      const payStatusVal = type === 'seña' ? 'partial' : 'completed';
       return {
         ...prev,
         status: statusVal,
@@ -183,11 +183,11 @@ export function OrderManagement() {
         paymentStatus: payStatusVal
       };
     });
-    toast.success(`Pago de ${type === 'deposit' ? 'Seña' : 'Saldo'} aprobado correctamente.`);
+    toast.success(`Pago de ${type === 'seña' ? 'Seña' : 'Saldo'} aprobado correctamente.`);
     setIsDetailOpen(false);
   };
 
-  const handleRejectPaymentSubmit = (e: React.FormEvent, type: 'deposit' | 'final') => {
+  const handleRejectPaymentSubmit = (e: React.FormEvent, type: 'seña' | 'saldo') => {
     e.preventDefault();
     if (!selectedOrder) return;
     if (!rejectPaymentReason.trim()) {
@@ -197,13 +197,13 @@ export function OrderManagement() {
     verifyPayment(selectedOrder.id, type, 'reject', rejectPaymentReason);
     setSelectedOrder(prev => {
       if (!prev) return null;
-      const statusVal = type === 'deposit' ? 'pending_deposit' : 'pending_balance';
+      const statusVal = type === 'seña' ? 'pending_deposit' : 'pending_balance';
       return {
         ...prev,
         status: statusVal
       };
     });
-    toast.success(`Pago de ${type === 'deposit' ? 'Seña' : 'Saldo'} rechazado correctamente.`);
+    toast.success(`Pago de ${type === 'seña' ? 'Seña' : 'Saldo'} rechazado correctamente.`);
     setIsRejectPaymentOpen(false);
     setRejectPaymentReason('');
     setIsDetailOpen(false);
@@ -503,13 +503,13 @@ export function OrderManagement() {
 
               {/* Payment Verification Panel */}
               {(() => {
-                const pendingPayment = payments.find(p => p.orderId === selectedOrder.id && p.status === 'pending');
+                const pendingPayment = payments.find(p => p.orderId === selectedOrder.id && p.status === 'pending_validation');
                 if (pendingPayment) {
                   return (
                     <div className="p-4 bg-[rgba(251,191,36,0.05)] border border-[rgba(251,191,36,0.2)] rounded-xl space-y-3">
                       <p className="font-semibold text-[#FCD34D] text-xs uppercase tracking-wider">Verificación de Pago Requerida</p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
-                        <p className="text-[#A0A0A0]">Tipo de Pago: <span className="text-white font-medium">{pendingPayment.type === 'deposit' ? 'Seña (50%)' : 'Saldo Restante'}</span></p>
+                        <p className="text-[#A0A0A0]">Tipo de Pago: <span className="text-white font-medium">{pendingPayment.type === 'seña' ? 'Seña (50%)' : 'Saldo Restante'}</span></p>
                         <p className="text-[#A0A0A0]">Monto Cargado: <span className="text-white font-medium">{formatCurrency(pendingPayment.amount)}</span></p>
                         <p className="text-[#A0A0A0]">Método: <span className="text-white font-medium">{pendingPayment.method}</span></p>
                         <p className="text-[#A0A0A0]">Comprobante: 
@@ -560,7 +560,7 @@ export function OrderManagement() {
                 )}
                 {selectedOrder.status === 'pending_balance' && (
                   <Button size="sm" variant="primary" className="bg-[#4ADE80] hover:bg-[#22C55E]" onClick={() => {
-                    verifyPayment(selectedOrder.id, 'final', 'approve');
+                    verifyPayment(selectedOrder.id, 'saldo', 'approve');
                     setSelectedOrder(prev => prev ? {
                       ...prev,
                       status: 'finished',
