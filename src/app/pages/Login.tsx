@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { Button } from '../components/ui/Button';
-import { Mail, Lock, AlertCircle } from 'lucide-react';
+import { User, Lock, AlertCircle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export function Login() {
   const navigate = useNavigate();
   const { login, loginAttempts, lockoutUntil } = useApp();
   const [role] = useState<'client' | 'operator'>('operator');
-  const [email, setEmail] = useState('ivan@j3d.com');
+  const [username, setUsername] = useState('Ivan');
   const [password, setPassword] = useState('123456');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [secondsLeft, setSecondsLeft] = useState<number>(0);
@@ -38,7 +38,7 @@ export function Login() {
     e.preventDefault();
     setErrorMsg(null);
 
-    const result = login(email, password, role);
+    const result = login(username, password, role);
     if (result.success) {
       if (role === 'client') {
         navigate('/');
@@ -95,16 +95,16 @@ export function Login() {
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-white mb-2">
-                Correo Electrónico
+                Usuario
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A0A0A0]" />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A0A0A0]" />
                 <input
-                  type="email"
+                  type="text"
                   disabled={isLocked}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="tu@email.com"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Usuario"
                   className="w-full pl-12 pr-4 py-3 bg-[#151515] border border-[rgba(255,255,255,0.08)] rounded-xl text-white placeholder:text-[#A0A0A0] focus:outline-none focus:ring-2 focus:ring-[#FF1744]/50 focus:border-[#FF1744] transition-all disabled:opacity-50"
                   required
                 />

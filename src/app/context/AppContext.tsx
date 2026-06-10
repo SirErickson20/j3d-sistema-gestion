@@ -226,10 +226,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let valid = false;
     let userToSet: User | null = null;
 
-    if (role === 'client' && email === 'juan@example.com' && password === 'password') {
+    if (role === 'client' && (email === 'juan@example.com' || email.toLowerCase() === 'juan') && password === 'password') {
       valid = true;
       userToSet = mockClient;
-    } else if (role === 'operator' && email === 'ivan@j3d.com' && password === '123456') {
+    } else if (role === 'operator' && (email === 'ivan@j3d.com' || email.toLowerCase() === 'ivan') && password === '123456') {
       valid = true;
       userToSet = mockOperator;
     }
