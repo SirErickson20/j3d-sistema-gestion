@@ -37,7 +37,7 @@ export function ClientLanding() {
   const [trackingSearch, setTrackingSearch] = useState('');
 
   // Catalog tab filtering state
-  const [selectedTab, setSelectedTab] = useState<'all' | 'Vasos' | 'Llaveros' | 'Medallas'>('all');
+  const [selectedTab, setSelectedTab] = useState<'all' | 'Vasos' | 'Llaveros'>('all');
 
   // Catalog order checkout modal state
   const [isCatalogModalOpen, setIsCatalogModalOpen] = useState(false);
@@ -397,7 +397,7 @@ export function ClientLanding() {
         <div className="max-w-4xl mx-auto space-y-6 relative z-10">
           <div className="inline-flex items-center gap-2 bg-[#FF1744]/10 border border-[#FF1744]/30 text-[#FF1744] text-xs font-semibold uppercase tracking-widest px-4 py-1.5 rounded-full">
             <Sparkles className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '6s' }} />
-            ⚡ Impresión 3D Profesional — Vasos, Llaveros y Medallas
+            ⚡ Impresión 3D Profesional — Vasos, Llaveros y Mates
           </div>
           
           <h2 className="text-white font-black leading-none font-['Bebas_Neue',_sans-serif] tracking-wider text-5xl sm:text-7xl lg:text-8xl">
@@ -407,7 +407,7 @@ export function ClientLanding() {
           </h2>
 
           <p className="text-[#8888aa] text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-            Elegí tus vasos térmicos, llaveros promocionales o medallas personalizadas directamente desde nuestro catálogo estándar o cargá tu diseño para cotizar una pieza única.
+            Elegí tus mates de Stitch, llaveros personalizados o vasos chopp directamente desde nuestro catálogo estándar o cargá tu diseño para cotizar una pieza única.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
@@ -439,23 +439,23 @@ export function ClientLanding() {
           <div className="carousel-track-anim">
             {/* Products items (duplicated for loop) */}
             {[
-              { icon: '🏆', name: 'Medalla Deportiva J3D', price: '$2.500' },
-              { icon: '🥤', name: 'Vaso Térmico Custom', price: '$3.500' },
-              { icon: '🔑', name: 'Llavero de Iniciales', price: '$1.200' },
-              { icon: '🏅', name: 'Medalla Corporativa', price: '$2.500' },
-              { icon: '🥤', name: 'Vaso Café Doble Capa', price: '$3.500' },
-              { icon: '🔑', name: 'Llavero con Logo J3D', price: '$1.200' },
-              { icon: '🏆', name: 'Medalla de Campeón', price: '$2.500' },
-              { icon: '🥤', name: 'Vaso de Cerveza 3D', price: '$3.500' },
+              { icon: '🥤', name: 'Mate Stitch J3D', price: '$15.000' },
+              { icon: '🥤', name: 'Vaso Chopp River', price: '$10.000' },
+              { icon: '🔑', name: 'Llavero CARP River', price: '$1.200' },
+              { icon: '🥤', name: 'Vaso Chopp GyE', price: '$10.000' },
+              { icon: '🥤', name: 'Mate Stitch J3D', price: '$15.000' },
+              { icon: '🥤', name: 'Vaso Chopp River', price: '$10.000' },
+              { icon: '🔑', name: 'Llavero CARP River', price: '$1.200' },
+              { icon: '🥤', name: 'Vaso Chopp GyE', price: '$10.000' },
               // Duplicate set
-              { icon: '🏆', name: 'Medalla Deportiva J3D', price: '$2.500' },
-              { icon: '🥤', name: 'Vaso Térmico Custom', price: '$3.500' },
-              { icon: '🔑', name: 'Llavero de Iniciales', price: '$1.200' },
-              { icon: '🏅', name: 'Medalla Corporativa', price: '$2.500' },
-              { icon: '🥤', name: 'Vaso Café Doble Capa', price: '$3.500' },
-              { icon: '🔑', name: 'Llavero con Logo J3D', price: '$1.200' },
-              { icon: '🏆', name: 'Medalla de Campeón', price: '$2.500' },
-              { icon: '🥤', name: 'Vaso de Cerveza 3D', price: '$3.500' }
+              { icon: '🥤', name: 'Mate Stitch J3D', price: '$15.000' },
+              { icon: '🥤', name: 'Vaso Chopp River', price: '$10.000' },
+              { icon: '🔑', name: 'Llavero CARP River', price: '$1.200' },
+              { icon: '🥤', name: 'Vaso Chopp GyE', price: '$10.000' },
+              { icon: '🥤', name: 'Mate Stitch J3D', price: '$15.000' },
+              { icon: '🥤', name: 'Vaso Chopp River', price: '$10.000' },
+              { icon: '🔑', name: 'Llavero CARP River', price: '$1.200' },
+              { icon: '🥤', name: 'Vaso Chopp GyE', price: '$10.000' }
             ].map((item, index) => (
               <div
                 key={index}
@@ -490,9 +490,8 @@ export function ClientLanding() {
         <div className="flex flex-wrap gap-2 border-b border-white/5 pb-4">
           {[
             { id: 'all', label: 'Todos los productos' },
-            { id: 'Vasos', label: '🥤 Vasos' },
-            { id: 'Llaveros', label: '🔑 Llaveros' },
-            { id: 'Medallas', label: '🏆 Medallas' }
+            { id: 'Vasos', label: '🥤 Vasos y Mates' },
+            { id: 'Llaveros', label: '🔑 Llaveros' }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -522,10 +521,18 @@ export function ClientLanding() {
                 className="overflow-hidden border border-white/5 bg-[#16161f] p-0 flex flex-col justify-between hover:border-[#FF1744]/40 hover:-translate-y-1.5 transition-all group"
               >
                 {/* Image / Icon Container */}
-                <div className="aspect-video w-full bg-[#1c1c28] flex items-center justify-center text-6xl relative select-none overflow-hidden">
-                  <span className="icon-tilt group-hover:scale-125 group-hover:animate-bounce inline-block">
-                    {emoji}
-                  </span>
+                <div className="aspect-video w-full bg-[#1c1c28] flex items-center justify-center relative select-none overflow-hidden">
+                  {product.image ? (
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <span className="text-6xl icon-tilt group-hover:scale-125 group-hover:animate-bounce inline-block">
+                      {emoji}
+                    </span>
+                  )}
                   
                   <span className={`absolute top-4 right-4 ${badgeColor} text-[10px] font-extrabold text-white uppercase tracking-wider px-2.5 py-1 rounded-md shadow-lg`}>
                     {badgeText}
