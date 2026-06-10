@@ -594,7 +594,7 @@ export function OrderManagement() {
         {selectedOrder && (
           <Modal isOpen={isRejectPaymentOpen} onClose={() => setIsRejectPaymentOpen(false)} title="Rechazar Pago">
             <form onSubmit={(e) => {
-              const pendingPayment = payments.find(p => p.orderId === selectedOrder.id && p.status === 'pending');
+              const pendingPayment = payments.find(p => p.orderId === selectedOrder.id && p.status === 'pending_validation');
               if (pendingPayment) {
                 handleRejectPaymentSubmit(e, pendingPayment.type);
               }
