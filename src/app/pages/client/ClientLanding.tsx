@@ -220,12 +220,7 @@ export function ClientLanding() {
       toast.error('Por favor, ingresá tu email.');
       return;
     }
-    if (customFiles.length === 0) {
-      setUploadError(true);
-      toast.error('Requerimiento RF03: Es obligatorio adjuntar al menos una imagen digital de referencia.');
-      document.getElementById('upload-area-container')?.scrollIntoView({ behavior: 'smooth' });
-      return;
-    }
+
     if (!customDesc.trim()) {
       toast.error('Por favor, describí tu proyecto.');
       return;
@@ -664,15 +659,11 @@ export function ClientLanding() {
               {/* Upload area */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-extrabold text-[#8888aa] uppercase tracking-widest block">
-                  Adjuntar Archivos / Diseños <span className="text-[#FF1744] font-bold">* Requerido (JPG/PNG, máx 5MB)</span>
+                  Adjuntar Archivos / Diseños <span className="text-[#8888aa] font-semibold">(Opcional - JPG/PNG, máx 5MB)</span>
                 </label>
                 <div
                   id="upload-area-container"
-                  className={`relative border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all bg-[#1c1c28]/40 ${
-                    uploadError
-                      ? 'border-[#FF1744] bg-[#FF1744]/5 animate-pulse'
-                      : 'border-white/5 hover:border-[#7c3aed] hover:bg-[#7c3aed]/5'
-                  }`}
+                  className="relative border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all bg-[#1c1c28]/40 border-white/5 hover:border-[#7c3aed] hover:bg-[#7c3aed]/5"
                 >
                   <input
                     type="file"
@@ -685,12 +676,6 @@ export function ClientLanding() {
                   <p className="text-xs text-white font-semibold">Hacé clic o arrastrá tus archivos acá</p>
                   <p className="text-[10px] text-[#8888aa] mt-1">Imágenes (.png, .jpg, .jpeg) — Máx 5MB por archivo</p>
                 </div>
-
-                {uploadError && (
-                  <p className="text-[#FF1744] text-[10px] font-bold tracking-wide mt-1">
-                    ⚠️ Debe cargar obligatoriamente al menos una imagen digital de referencia.
-                  </p>
-                )}
 
                 {customFilePreviews.length > 0 && (
                   <div className="mt-3 space-y-2 bg-[#1c1c28] p-4 rounded-xl border border-white/5">
