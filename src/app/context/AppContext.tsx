@@ -612,9 +612,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         estimatedDelivery = deliveryDate.toISOString().split('T')[0];
       }
 
+      const nextPaymentStatus = type === 'seña' ? 'pending' : 'partial';
+
       return {
         ...o,
         status: nextStatus,
+        paymentStatus: nextPaymentStatus,
         estimatedDelivery,
         comments: '', // clear old operator reject reasons if any
         updatedAt: now,
@@ -675,6 +678,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return {
           ...o,
           status: targetStatus,
+          paymentStatus: 'invalidated',
           comments: reason || 'Comprobante de pago rechazado. Por favor verifique e intente nuevamente.',
           updatedAt: now,
           statusHistory: [

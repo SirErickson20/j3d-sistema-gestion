@@ -60,6 +60,7 @@ export function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
     pending: { label: 'Pendiente', variant: 'warning' },
     partial: { label: 'Parcial', variant: 'info' },
     completed: { label: 'Pagado', variant: 'success' },
+    invalidated: { label: 'Invalidado', variant: 'danger' },
   };
 
   const config = statusConfig[status];

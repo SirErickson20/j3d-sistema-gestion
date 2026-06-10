@@ -200,7 +200,8 @@ export function OrderManagement() {
       const statusVal = type === 'seña' ? 'pending_deposit' : 'pending_balance';
       return {
         ...prev,
-        status: statusVal
+        status: statusVal,
+        paymentStatus: 'invalidated'
       };
     });
     toast.success(`Pago de ${type === 'seña' ? 'Seña' : 'Saldo'} rechazado correctamente.`);

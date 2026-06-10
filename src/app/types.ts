@@ -15,7 +15,7 @@ export type OrderStatus =
   | 'delivered'         // Entregado
   | 'cancelled';        // Cancelado
 
-export type PaymentStatus = 'pending' | 'partial' | 'completed';
+export type PaymentStatus = 'pending' | 'partial' | 'completed' | 'invalidated';
 export type PaymentValidationStatus = 'pending_validation' | 'validated' | 'invalidated';
 
 export interface User {
