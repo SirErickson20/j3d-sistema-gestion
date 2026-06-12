@@ -8,8 +8,8 @@ export function Login() {
   const navigate = useNavigate();
   const { login, loginAttempts, lockoutUntil } = useApp();
   const [role] = useState<'client' | 'operator'>('operator');
-  const [username, setUsername] = useState('Ivan');
-  const [password, setPassword] = useState('123456');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [secondsLeft, setSecondsLeft] = useState<number>(0);
 

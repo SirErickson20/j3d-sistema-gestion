@@ -29,9 +29,6 @@ export function DashboardLayout({ children, userName, userRole }: DashboardLayou
             <Link to="/" className="text-sm font-medium text-[#A0A0A0] hover:text-[#FF1744] transition-colors no-underline">
               Volver al Catálogo
             </Link>
-            <Link to="/login" className="px-4 py-2 bg-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.12)] text-white text-xs font-semibold rounded-lg transition-all border border-[rgba(255,255,255,0.1)] no-underline">
-              Acceso Operador
-            </Link>
           </div>
         </header>
         <main className="flex-1 max-w-7xl w-full mx-auto py-8 px-4 sm:px-6 lg:px-8">

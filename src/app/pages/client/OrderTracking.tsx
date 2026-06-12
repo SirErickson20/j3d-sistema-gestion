@@ -426,7 +426,7 @@ export function OrderTracking() {
                       <div className="flex gap-3 w-full md:w-auto">
                         <Button variant="outline" className="flex-1 md:flex-none" onClick={() => setIsRedesignModalOpen(true)}>
                           <RotateCcw className="w-4 h-4 mr-1" />
-                          Pedir Modificaciones
+                          Solicitar Modificaciones
                         </Button>
                         <Button variant="outline" className="flex-1 md:flex-none border-red-500/40 text-[#FF1744] hover:bg-red-500/10" onClick={() => setIsRejectModalOpen(true)}>
                           Rechazar

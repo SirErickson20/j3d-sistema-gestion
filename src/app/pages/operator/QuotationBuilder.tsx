@@ -188,7 +188,7 @@ export function QuotationBuilder() {
 
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Constructor de Cotizaciones</h1>
+          <h1 className="text-3xl font-bold text-white mb-2"><br />Constructor de Cotizaciones</h1>
           <p className="text-[#A0A0A0]">Calcula y emite presupuestos en tiempo real (RF08–RF10)</p>
         </div>
 

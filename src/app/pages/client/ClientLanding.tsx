@@ -701,6 +701,8 @@ export function ClientLanding() {
                     </div>
                   </div>
                 )}
+
+                
               </div>
 
 
@@ -764,6 +766,54 @@ export function ClientLanding() {
                   required
                 />
               </div>
+
+              
+              <div className="space-y-1">
+                <label className="text-[10px] font-extrabold text-[#8888aa] uppercase tracking-widest">Entrega</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCatalogDelivery('pickup')}
+                    className={`py-2 px-1 rounded-xl border text-[10px] font-bold uppercase transition-all flex items-center justify-center gap-1 ${
+                      catalogDelivery === 'pickup'
+                        ? 'bg-[#FF1744] text-white border-[#FF1744]'
+                        : 'bg-[#1c1c28] text-[#8888aa] border-white/5 hover:text-white'
+                    }`}
+                  >
+                    <Store className="w-3 h-3" />
+                    Local
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCatalogDelivery('delivery')}
+                    className={`py-2 px-1 rounded-xl border text-[10px] font-bold uppercase transition-all flex items-center justify-center gap-1 ${
+                      catalogDelivery === 'delivery'
+                        ? 'bg-[#FF1744] text-white border-[#FF1744]'
+                        : 'bg-[#1c1c28] text-[#8888aa] border-white/5 hover:text-white'
+                    }`}
+                  >
+                    <Truck className="w-3 h-3" />
+                    Envío
+                  </button>
+                </div>
+              </div>
+
+            {catalogDelivery === 'delivery' && (
+              <div className="space-y-1">
+                <label className="text-[10px] font-extrabold text-[#8888aa] uppercase tracking-widest block">Dirección de entrega *</label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8888aa]" />
+                  <input
+                    type="text"
+                    placeholder="Calle, Altura, Departamento, Código Postal, Provincia"
+                    value={catalogAddress}
+                    onChange={(e) => setCatalogAddress(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2.5 bg-[#1c1c28] border border-white/5 rounded-xl text-xs text-white placeholder:text-[#8888aa] focus:outline-none focus:border-[#FF1744]"
+                    required
+                  />
+                </div>
+              </div>
+            )}
 
               {/* Presupuesto widget without showing price */}
               <div className="p-5 bg-[#7c3aed]/5 border border-[#7c3aed]/20 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">

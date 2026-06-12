@@ -139,7 +139,7 @@ export function OperatorDashboard() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Panel de Control y Reportes</h1>
+            <h1 className="text-3xl font-bold text-white mb-2"><br />Panel de Control y Reportes</h1>
             <p className="text-[#A0A0A0]">
               Visualiza estadísticas de facturación y producción con filtros avanzados (RF16)
             </p>

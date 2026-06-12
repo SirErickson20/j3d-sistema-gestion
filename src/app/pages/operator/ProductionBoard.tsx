@@ -101,7 +101,7 @@ export function ProductionBoard() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Tablero de Producción</h1>
+          <h1 className="text-3xl font-bold text-white mb-2"><br />Tablero de Producción</h1>
           <p className="text-[#A0A0A0] text-sm">
             Gestiona el flujo de trabajo de todos los pedidos en tiempo real (RF05)
           </p>

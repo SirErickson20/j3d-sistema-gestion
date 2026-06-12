@@ -255,9 +255,6 @@ export function OrderManagement() {
               <Download className="w-4 h-4" />
               Exportar
             </Button>
-            <Button variant="outline" className="border-red-500/40 text-red-400 hover:bg-red-500/10" onClick={clearAllData}>
-              Limpiar Todo
-            </Button>
           </div>
         </div>
 
