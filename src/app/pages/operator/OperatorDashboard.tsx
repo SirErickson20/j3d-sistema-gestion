@@ -73,8 +73,7 @@ export function OperatorDashboard() {
   ).length;
 
   const totalBilling = filteredOrders
-    .filter((o) => o.status !== 'cancelled')
-    .reduce((sum, o) => sum + o.totalPrice, 0);
+    .reduce((sum, o) => sum + o.depositPaid, 0);
 
   const pendingQuotationsCount = filteredOrders.filter(
     (o) => o.status === 'pending_quotation' || o.status === 'quotation_sent'
@@ -87,9 +86,8 @@ export function OperatorDashboard() {
     const monthlyCount = Array(12).fill(0);
 
     filteredOrders.forEach((o) => {
-      if (o.status === 'cancelled') return;
       const m = new Date(o.createdAt).getMonth();
-      monthlySum[m] += o.totalPrice;
+      monthlySum[m] += o.depositPaid;
       monthlyCount[m] += 1;
     });
 

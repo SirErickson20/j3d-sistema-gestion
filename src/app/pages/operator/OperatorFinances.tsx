@@ -18,9 +18,13 @@ export function OperatorFinances() {
   );
 
   // Calculate overall financial statistics
-  const totalInvoiced = orders.reduce((sum, o) => sum + o.totalPrice, 0);
-  const totalDeposits = orders.reduce((sum, o) => sum + o.depositPaid, 0);
-  const totalRemaining = orders.reduce((sum, o) => sum + o.remainingBalance, 0);
+  const totalInvoiced = orders.reduce((sum, o) => sum + o.depositPaid, 0);
+  const totalDeposits = payments
+    .filter(p => p.status === 'validated' && p.type === 'seña')
+    .reduce((sum, p) => sum + p.amount, 0);
+  const totalRemaining = orders
+    .filter(o => o.status !== 'cancelled')
+    .reduce((sum, o) => sum + o.remainingBalance, 0);
 
   return (
     <DashboardLayout userName={currentUser?.name || 'María García'} userRole="operator">
