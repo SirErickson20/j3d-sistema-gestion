@@ -932,7 +932,7 @@ export function ClientLanding() {
         </div>
       </footer>
 
-      {/* MODAL: CHECKOUT DE PRODUCTO DE CATÁLOGO (RF02) */}
+      {/* MODAL: CHECKOUT DE PRODUCTO DE CATÁLOGO */}
       {selectedProduct && (
         <Modal
           isOpen={isCatalogModalOpen}

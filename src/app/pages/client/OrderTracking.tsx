@@ -355,7 +355,7 @@ export function OrderTracking() {
         {order.status !== 'cancelled' && (
           <Card glow>
             <CardHeader>
-              <CardTitle>Progreso del Pedido (RF06)</CardTitle>
+              <CardTitle>Progreso del Pedido</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="relative pl-6 sm:pl-0 sm:flex sm:justify-between sm:gap-4 overflow-x-auto pb-4">
@@ -404,7 +404,7 @@ export function OrderTracking() {
                 })}
               </div>
 
-              {/* Estimated Delivery Banner (RF06) */}
+              {/* Estimated Delivery Banner */}
               {order.estimatedDelivery && (
                 <div className="mt-8 p-4 bg-[rgba(255,23,68,0.05)] border border-[rgba(255,23,68,0.2)] rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -437,12 +437,12 @@ export function OrderTracking() {
           </Card>
         )}
 
-        {/* Budget Section (RF11 / RF12 / RF13) */}
+        {/* Budget Section */}
         {quotation && (
           <Card hover glow={order.status === 'quotation_sent'}>
             <CardHeader className="flex flex-row items-center justify-between border-b border-[rgba(255,255,255,0.08)] pb-4">
               <div>
-                <CardTitle>Presupuesto del Pedido (RF11)</CardTitle>
+                <CardTitle>Presupuesto del Pedido</CardTitle>
                 <p className="text-xs text-[#A0A0A0] mt-1">
                   Cotización emitida. Válido por 7 días hasta el: <span className="text-white font-semibold">{formatDate(quotation.validUntil)}</span>
                 </p>
@@ -462,7 +462,7 @@ export function OrderTracking() {
                   </p>
                 </div>
 
-                {/* RF12 & RF13 Actions */}
+                {/* Actions */}
                 {order.status === 'quotation_sent' && (
                   (() => {
                     const isQuoteExpired = quotation ? new Date() > new Date(quotation.validUntil) : false;
@@ -508,7 +508,7 @@ export function OrderTracking() {
                 )}
               </div>
 
-              {/* Archivos adjuntos del operador (RF10) */}
+              {/* Archivos adjuntos del operador */}
               {quotation.attachments && quotation.attachments.length > 0 && (
                 <div className="pt-4">
                   <p className="text-sm text-[#A0A0A0] mb-3 font-medium">Archivos adjuntos del presupuesto</p>

@@ -105,7 +105,7 @@ export interface Quotation {
   prototypeUrl?: string; // 3D viewer or render simulation
   createdAt: string;
   approved: boolean | null;
-  // RF10 Prototypes
+  // Prototypes
   renderUrl?: string;
   imageUrl?: string;
   model3DUrl?: string;

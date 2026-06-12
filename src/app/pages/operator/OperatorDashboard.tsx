@@ -36,7 +36,7 @@ export function OperatorDashboard() {
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
 
-  // 1. Filter orders based on Year, Month, and Date Range (RF16)
+  // 1. Filter orders based on Year, Month, and Date Range
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
       const orderDate = new Date(order.createdAt);
@@ -100,7 +100,7 @@ export function OperatorDashboard() {
     })).filter((d, idx) => d.revenue > 0 || d.orders > 0 || idx <= new Date().getMonth()); // show months up to current
   }, [filteredOrders]);
 
-  // 4. Custom vs Catalog order split (RF16)
+  // 4. Custom vs Catalog order split
   const orderTypeSplitData = useMemo(() => {
     let custom = 0;
     let catalog = 0;
@@ -141,17 +141,17 @@ export function OperatorDashboard() {
           <div>
             <h1 className="text-3xl font-bold text-white mb-2"><br />Panel de Control y Reportes</h1>
             <p className="text-[#A0A0A0]">
-              Visualiza estadísticas de facturación y producción con filtros avanzados (RF16)
+              Visualiza estadísticas de facturación y producción con filtros avanzados
             </p>
           </div>
         </div>
 
-        {/* Filters Panel (RF16) */}
+        {/* Filters Panel */}
         <Card>
           <div className="p-4 bg-[#151515] rounded-xl border border-[rgba(255,255,255,0.08)]">
             <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
               <Calendar className="w-4 h-4 text-[#FF1744]" />
-              Filtros de Reporte (RF16)
+              Filtros de Reporte
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
@@ -218,7 +218,7 @@ export function OperatorDashboard() {
             icon={<Package />}
           />
           <KPICard
-            title="Facturación (RF16)"
+            title="Facturación"
             value={formatCurrency(totalBilling)}
             icon={<DollarSign />}
           />
@@ -307,7 +307,7 @@ export function OperatorDashboard() {
           {/* Order Type Split */}
           <Card hover>
             <CardHeader>
-              <CardTitle>Pedidos por Tipo (RF16)</CardTitle>
+              <CardTitle>Pedidos por Tipo</CardTitle>
             </CardHeader>
             <CardContent>
               {orderTypeSplitData.length > 0 ? (

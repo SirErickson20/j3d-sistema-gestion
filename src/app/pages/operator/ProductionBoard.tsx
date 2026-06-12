@@ -150,7 +150,7 @@ export function ProductionBoard() {
         <div>
           <h1 className="text-3xl font-bold text-white mb-2"><br />Tablero de Producción</h1>
           <p className="text-[#A0A0A0] text-sm">
-            Gestiona el flujo de trabajo de todos los pedidos en tiempo real (RF05)
+            Gestiona el flujo de trabajo de todos los pedidos en tiempo real
           </p>
         </div>
 

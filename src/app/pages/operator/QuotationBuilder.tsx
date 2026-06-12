@@ -65,11 +65,11 @@ export function QuotationBuilder() {
   const [material, setMaterial] = useState('PLA');
   const [margin, setMargin] = useState(40);
 
-  // RF09 Manual Adjustments
+  // Manual Adjustments
   const [customPrice, setCustomPrice] = useState<string>('');
   const [customDate, setCustomDate] = useState<string>('');
 
-  // RF10 Prototypes / Attachments
+  // Prototypes / Attachments
   const [attachments, setAttachments] = useState<{ name: string; dataUrl: string; type: string }[]>([]);
 
   // Confirmation state
@@ -143,9 +143,9 @@ export function QuotationBuilder() {
     }
   };
 
-  // Cost calculations (RF08) — using configurable rates
+  // Cost calculations — using configurable rates
   const printTime = inputHours + inputMinutes / 60;
-  const estimatedHours = printTime * 1.8; // +80% margin RF09
+  const estimatedHours = printTime * 1.8; // +80% margin
   const estimatedDays = Math.ceil(estimatedHours / 8);
 
   const getSuggestedDate = () => {
@@ -219,7 +219,7 @@ export function QuotationBuilder() {
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-white mb-2"><br />Constructor de Cotizaciones</h1>
-          <p className="text-[#A0A0A0]">Calcula y emite presupuestos en tiempo real (RF08–RF10)</p>
+          <p className="text-[#A0A0A0]">Calcula y emite presupuestos en tiempo real</p>
         </div>
 
         {/* ── Configuración de Costos Fijos ─────────────────────────────── */}
@@ -455,7 +455,7 @@ export function QuotationBuilder() {
               {/* 2. Quotation parameters */}
               <Card hover>
                 <CardHeader>
-                  <CardTitle>2. Parámetros de Cotización (RF08 - RF09)</CardTitle>
+                  <CardTitle>2. Parámetros de Cotización</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -500,7 +500,7 @@ export function QuotationBuilder() {
                         </div>
                       </div>
                       <p className="text-[10px] text-[#FCD34D] mt-1.5">
-                        * Horas estimadas (+80% margen RF09): {formatHoursAndMinutes(estimatedHours)}
+                        * Horas estimadas (+80% margen): {formatHoursAndMinutes(estimatedHours)}
                       </p>
                     </div>
 
@@ -530,7 +530,7 @@ export function QuotationBuilder() {
                   <div className="pt-4 border-t border-[rgba(255,255,255,0.08)] grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-white mb-1">
-                        Ajuste de Precio Final (Opcional - RF09)
+                        Ajuste de Precio Final (Opcional)
                       </label>
                       <Input
                         type="number"
@@ -541,7 +541,7 @@ export function QuotationBuilder() {
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-white mb-1">
-                        Fecha Estimada de Entrega (Opcional - RF09)
+                        Fecha Estimada de Entrega (Opcional)
                       </label>
                       <Input
                         type="date"
@@ -556,10 +556,10 @@ export function QuotationBuilder() {
                 </CardContent>
               </Card>
 
-              {/* 3. RF10 Attachments */}
+              {/* 3. Attachments */}
               <Card hover>
                 <CardHeader>
-                  <CardTitle>3. Adjuntar Archivos para el Cliente (RF10)</CardTitle>
+                  <CardTitle>3. Adjuntar Archivos para el Cliente</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="relative border-2 border-dashed border-[rgba(255,255,255,0.12)] hover:border-[#FF1744]/60 transition-colors rounded-xl p-6 text-center cursor-pointer">
@@ -616,7 +616,7 @@ export function QuotationBuilder() {
               {/* Cost Breakdown */}
               <Card hover>
                 <CardHeader>
-                  <CardTitle>Desglose de Costos (RF08)</CardTitle>
+                  <CardTitle>Desglose de Costos</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3 text-sm">

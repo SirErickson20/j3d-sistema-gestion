@@ -214,7 +214,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   });
 
-  // Auth operations (RF01)
+  // Auth operations
   const login = (email: string, password: string, role: UserRole) => {
     const now = Date.now();
     
@@ -258,7 +258,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.removeItem('j3d_user');
   };
 
-  // RF02 - Pedido de Catálogo
+  // Pedido de Catálogo
   const createCatalogOrder = (
     productId: string,
     productName: string,
@@ -315,7 +315,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return newOrder;
   };
 
-  // RF03 - Pedido Personalizado
+  // Pedido Personalizado
   const createCustomOrder = (
     pieceType: string,
     material: string,
@@ -364,7 +364,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return newOrder;
   };
 
-  // RF05 - Gestión de Estados
+  // Gestión de Estados
   const updateOrderStatus = (orderId: string, status: OrderStatus, role: UserRole, reason?: string) => {
     const now = new Date().toISOString();
     
@@ -394,7 +394,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
   };
 
-  // RF08 & RF09 & RF10 - Elaboración/Ajuste de Presupuesto y Prototipos
+  // Elaboración/Ajuste de Presupuesto y Prototipos
   const createQuotation = (
     orderId: string,
     weight: number,
@@ -410,7 +410,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ) => {
     const quoteId = `QUO-${Date.now().toString().slice(-6)}`;
     const now = new Date().toISOString();
-    const validUntil = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days (RF11)
+    const validUntil = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days
 
     const estimatedPrintHours = printTime * 1.8;
 
@@ -472,7 +472,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return newQuotation;
   };
 
-  // RF12 - Solicitar Modificaciones
+  // Solicitar Modificaciones
   const requestQuotationModifications = (orderId: string, comments: string) => {
     const now = new Date().toISOString();
     
@@ -496,7 +496,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
   };
 
-  // RF13 - Aceptar Presupuesto
+  // Aceptar Presupuesto
   const acceptQuotation = (orderId: string) => {
     const now = new Date().toISOString();
     
@@ -519,7 +519,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
   };
 
-  // RF13 - Rechazar Presupuesto
+  // Rechazar Presupuesto
   const rejectQuotation = (orderId: string, reason: string) => {
     const now = new Date().toISOString();
     
@@ -547,7 +547,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
   };
 
-  // RF14 - Registro de Pagos (Client submits receipt)
+  // Registro de Pagos (Client submits receipt)
   const submitPaymentReceipt = (
     orderId: string,
     type: 'seña' | 'saldo',
@@ -629,7 +629,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
   };
 
-  // Operator verifies payment (RF14 approval or reject)
+  // Operator verifies payment (approval or reject)
   const verifyPayment = (
     orderId: string,
     type: 'seña' | 'saldo',

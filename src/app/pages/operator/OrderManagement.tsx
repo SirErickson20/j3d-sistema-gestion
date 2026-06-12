@@ -448,7 +448,7 @@ export function OrderManagement() {
                 </div>
               </div>
 
-              {/* Cancellation Info (RF07) */}
+              {/* Cancellation Info */}
               {selectedOrder.status === 'cancelled' && (
                 <div className="p-4 bg-[rgba(255,23,68,0.08)] border border-[rgba(255,23,68,0.25)] rounded-xl space-y-2">
                   <p className="font-semibold text-[#FF1744] text-xs uppercase tracking-wider">Detalles de Cancelación</p>
