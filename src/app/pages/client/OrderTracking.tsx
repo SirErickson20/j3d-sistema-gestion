@@ -863,27 +863,27 @@ export function OrderTracking() {
         {isFichaModalOpen && quotation && (
           <Modal isOpen={isFichaModalOpen} onClose={() => setIsFichaModalOpen(false)} title="Documento Oficial de Presupuesto">
             <style dangerouslySetInnerHTML={{__html: `
-              .budget-document-section { padding: 40px 10px; background: #050510; border-radius: 16px; overflow: hidden; }
+              .budget-document-section { padding: 24px 12px; background: #050510; border-radius: 16px; overflow: hidden; }
               .budget-container { max-width: 700px; margin: auto; }
-              .budget-header { text-align: center; margin-bottom: 30px; }
-              .budget-badge { display: inline-block; padding: 6px 14px; border-radius: 999px; background: rgba(255, 0, 80, .1); color: #ff3366; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
-              .budget-header h1 { margin-top: 15px; font-size: 2.2rem; font-weight: 800; color: white; line-height: 1.2; }
+              .budget-header { text-align: center; margin-bottom: 20px; }
+              .budget-badge { display: inline-block; padding: 4px 12px; border-radius: 999px; background: rgba(255, 0, 80, .1); color: #ff3366; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+              .budget-header h1 { margin-top: 10px; font-size: 1.8rem; font-weight: 800; color: white; line-height: 1.2; }
               .budget-header h1 span { display: block; color: #ff1f4d; }
-              .budget-header p { color: #8f94aa; max-width: 500px; margin: 10px auto 0; font-size: 0.85rem; }
-              .budget-card { background: #10101d; border: 1px solid rgba(255,255,255,.08); border-radius: 20px; padding: 25px; box-shadow: 0 0 20px rgba(255,0,80,.1); }
-              .budget-info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
-              .info-item { background: #171727; padding: 14px; border-radius: 10px; }
-              .info-item label { display: block; color: #8f94aa; font-size: .75rem; margin-bottom: 4px; }
-              .info-item span { color: white; font-weight: 600; font-size: 0.9rem; }
-              .financial-breakdown { margin-top: 15px; }
-              .financial-breakdown h3 { color: white; margin-bottom: 15px; font-size: 1.1rem; }
-              .cost-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.05); font-size: 0.85rem; }
+              .budget-header p { color: #8f94aa; max-width: 500px; margin: 8px auto 0; font-size: 0.8rem; }
+              .budget-card { background: #10101d; border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 20px; box-shadow: 0 0 15px rgba(255,0,80,.08); }
+              .budget-info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 18px; }
+              .info-item { background: #171727; padding: 10px 12px; border-radius: 8px; }
+              .info-item label { display: block; color: #8f94aa; font-size: .7rem; margin-bottom: 2px; }
+              .info-item span { color: white; font-weight: 600; font-size: 0.85rem; }
+              .financial-breakdown { margin-top: 12px; }
+              .financial-breakdown h3 { color: white; margin-bottom: 10px; font-size: 1rem; }
+              .cost-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.05); font-size: 0.8rem; }
               .cost-row span { color: #aeb3c7; }
               .cost-row strong { color: white; }
-              .cost-row.total { margin-top: 10px; font-size: 1.1rem; font-weight: bold; }
+              .cost-row.total { margin-top: 8px; font-size: 1rem; font-weight: bold; }
               .cost-row.total strong { color: #ff3366; }
-              .budget-actions { display: flex; gap: 10px; margin-top: 25px; }
-              .btn-primary, .btn-secondary { flex: 1; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; transition: .3s; font-size: 0.85rem; text-align: center; }
+              .budget-actions { display: flex; gap: 10px; margin-top: 20px; }
+              .btn-primary, .btn-secondary { flex: 1; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: .3s; font-size: 0.8rem; text-align: center; }
               .btn-primary { background: linear-gradient(135deg, #ff004c, #8b3dff); color: white; }
               .btn-primary:hover { transform: translateY(-2px); }
               .btn-secondary { background: #1b1b2e; color: white; border: 1px solid rgba(255,255,255,.1); }

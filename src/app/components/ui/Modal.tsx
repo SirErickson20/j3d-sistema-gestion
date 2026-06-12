@@ -31,13 +31,13 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
       {/* Modal */}
       <div
         className={cn(
-          'relative w-full bg-[#1C1C1C] border border-[rgba(255,255,255,0.08)] rounded-2xl shadow-2xl',
+          'relative w-full bg-[#1C1C1C] border border-[rgba(255,255,255,0.08)] rounded-2xl shadow-2xl flex flex-col max-h-[90vh]',
           sizes[size]
         )}
       >
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between p-6 border-b border-[rgba(255,255,255,0.08)]">
+          <div className="flex items-center justify-between p-6 border-b border-[rgba(255,255,255,0.08)] shrink-0">
             <h2 className="text-xl font-medium text-white">{title}</h2>
             <button
               onClick={onClose}
@@ -49,7 +49,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
         )}
 
         {/* Content */}
-        <div className="p-6">{children}</div>
+        <div className="p-6 overflow-y-auto flex-1">{children}</div>
       </div>
     </div>
   );
