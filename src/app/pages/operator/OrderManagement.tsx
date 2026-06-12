@@ -476,6 +476,19 @@ export function OrderManagement() {
                 </div>
               </div>
 
+              {/* Redesign Comments */}
+              {selectedOrder.comments && (
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-white">Detalles del Rediseño Solicitado:</h4>
+                  <div className="p-4 bg-[rgba(251,191,36,0.05)] border border-[rgba(251,191,36,0.2)] rounded-xl space-y-1">
+                    <p className="font-semibold text-[#FCD34D] text-xs uppercase tracking-wider mb-2">Comentarios del cliente:</p>
+                    <p className="text-xs text-white bg-[#0B0B0B]/50 p-2.5 rounded-lg border border-white/5 whitespace-pre-wrap leading-relaxed">
+                      {selectedOrder.comments}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Reference Files */}
               {selectedOrder.files && selectedOrder.files.length > 0 && (
                 <div className="space-y-2">

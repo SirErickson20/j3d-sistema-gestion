@@ -58,6 +58,7 @@ export function QuotationBuilder() {
   );
 
   const [selectedOrderId, setSelectedOrderId] = useState<string>('');
+  const selectedOrder = pendingOrders.find(o => o.id === selectedOrderId);
   const [weight, setWeight] = useState(150);
   const [inputHours, setInputHours] = useState(8);
   const [inputMinutes, setInputMinutes] = useState(0);
@@ -408,6 +409,48 @@ export function QuotationBuilder() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Input Form */}
             <div className="lg:col-span-2 space-y-6">
+
+              {/* Selected Order Details */}
+              {selectedOrder && (
+                <Card hover>
+                  <CardHeader>
+                    <CardTitle>Detalles del Pedido Seleccionado</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4 text-sm text-white">
+                    <div className="grid grid-cols-2 gap-4 bg-[#151515] p-4 rounded-xl border border-[rgba(255,255,255,0.08)]">
+                      <div>
+                        <p className="text-xs text-[#A0A0A0]">Cliente</p>
+                        <p className="font-semibold text-white">{selectedOrder.customerName}</p>
+                        <p className="text-xs text-[#A0A0A0]">{selectedOrder.customerEmail}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-[#A0A0A0]">Producto / Servicio</p>
+                        <p className="font-semibold text-white">{selectedOrder.productName}</p>
+                        <p className="text-xs text-[#A0A0A0]">Cantidad: {selectedOrder.quantity}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="font-semibold text-xs text-[#A0A0A0] uppercase tracking-wider">Especificaciones técnicas:</p>
+                      <div className="p-3 bg-[#151515] rounded-xl border border-[rgba(255,255,255,0.08)] space-y-1.5 text-xs text-[#A0A0A0]">
+                        {selectedOrder.specifications?.color && <p>Color: <span className="text-white">{selectedOrder.specifications.color}</span></p>}
+                        {selectedOrder.specifications?.notes && <p>Notas: <span className="text-white">{selectedOrder.specifications.notes}</span></p>}
+                        {selectedOrder.specifications?.pieceType && <p>Tipo de Pieza: <span className="text-white">{selectedOrder.specifications.pieceType}</span></p>}
+                        {selectedOrder.deliveryMethod && <p>Método de Entrega: <span className="text-white">{selectedOrder.deliveryMethod === 'pickup' ? 'Retiro en Local' : 'Envío a Domicilio'}</span></p>}
+                      </div>
+                    </div>
+
+                    {selectedOrder.comments && (
+                      <div className="p-4 bg-[rgba(251,191,36,0.05)] border border-[rgba(251,191,36,0.2)] rounded-xl space-y-2">
+                        <p className="font-semibold text-[#FCD34D] text-xs uppercase tracking-wider">Comentarios de Rediseño (Cliente):</p>
+                        <p className="text-xs text-white bg-[#0B0B0B]/50 p-2.5 rounded-lg border border-white/5 whitespace-pre-wrap leading-relaxed">
+                          {selectedOrder.comments}
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
               {/* 2. Quotation parameters */}
               <Card hover>
