@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { Card } from '../../components/ui/Card';
 import { OrderStatusBadge, PaymentStatusBadge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { Modal } from '../../components/ui/Modal';
 import { Package, User, Calendar, DollarSign, ArrowRight } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { formatCurrency, formatDate } from '../../lib/utils';
@@ -79,6 +81,28 @@ const columns: { id: OrderStatus; label: string; color: string }[] = [
 export function ProductionBoard() {
   const { orders, updateOrderStatus, currentUser } = useApp();
 
+  // Confirmation state
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
+
+  const triggerConfirm = (title: string, message: string, onConfirm: () => void) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      onConfirm
+    });
+  };
+
   const getOrdersByStatus = (status: OrderStatus) => {
     return orders.filter((order) => {
       if (status === 'pending_deposit') {
@@ -92,8 +116,31 @@ export function ProductionBoard() {
   };
 
   const handleMoveStatus = (orderId: string, newStatus: OrderStatus) => {
-    updateOrderStatus(orderId, newStatus, 'operator');
-    toast.success(`Pedido ${orderId} movido a "${newStatus}"`);
+    const order = orders.find(o => o.id === orderId);
+    if (!order || order.status === newStatus) return;
+
+    const statusLabels: Record<OrderStatus, string> = {
+      pending_quotation: 'Pendiente de Presupuesto',
+      quotation_sent: 'Presupuesto Enviado',
+      pending_approval: 'En Rediseño',
+      pending_deposit: 'Pendiente de Seña',
+      deposit_verification: 'Seña Pendiente de Verificación',
+      in_production: 'En Producción',
+      pending_balance: 'Listo (Pte. Saldo)',
+      finished: 'Aprobar Pago (Finalizado)',
+      balance_verification: 'Saldo Pendiente de Verificación',
+      delivered: 'Entregado',
+      cancelled: 'Cancelar'
+    };
+
+    triggerConfirm(
+      'Mover Estado de Pedido',
+      `¿Desea confirmar la actualización del estado del pedido #${orderId} a "${statusLabels[newStatus]}"?`,
+      () => {
+        updateOrderStatus(orderId, newStatus, 'operator');
+        toast.success(`Pedido ${orderId} movido a "${statusLabels[newStatus]}"`);
+      }
+    );
   };
 
   return (
@@ -225,6 +272,37 @@ export function ProductionBoard() {
           })}
         </div>
       </div>
+      {/* Confirmation Modal */}
+      <Modal
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+        title={confirmDialog.title}
+        size="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-[#A0A0A0]">{confirmDialog.message}</p>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              className="bg-[#FF1744] hover:bg-[#D50032] font-bold"
+              onClick={() => {
+                confirmDialog.onConfirm();
+                setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+              }}
+            >
+              Confirmar
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </DashboardLayout>
   );
 }

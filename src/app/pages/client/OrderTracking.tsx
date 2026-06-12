@@ -76,6 +76,28 @@ export function OrderTracking() {
 
   const [isFichaModalOpen, setIsFichaModalOpen] = useState(false);
 
+  // Confirmation state
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
+
+  const triggerConfirm = (title: string, message: string, onConfirm: () => void) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      onConfirm
+    });
+  };
+
   const order = orders.find((o) => o.id.replace(/_/g, '-').toUpperCase() === id?.replace(/_/g, '-').toUpperCase());
   if (!order) {
     return (
@@ -123,10 +145,16 @@ export function OrderTracking() {
       toast.error('Indique el motivo de cancelación');
       return;
     }
-    updateOrderStatus(order.id, 'cancelled', 'client', cancelReason);
-    toast.success('Pedido cancelado correctamente');
-    setIsCancelModalOpen(false);
-    setCancelReason('');
+    triggerConfirm(
+      'Cancelar Pedido',
+      '¿Desea confirmar la cancelación del pedido? Recuerde que la seña no posee devolución.',
+      () => {
+        updateOrderStatus(order.id, 'cancelled', 'client', cancelReason);
+        toast.success('Pedido cancelado correctamente');
+        setIsCancelModalOpen(false);
+        setCancelReason('');
+      }
+    );
   };
 
   const handlePaymentSubmit = (e: React.FormEvent, type: 'seña' | 'saldo') => {
@@ -135,24 +163,30 @@ export function OrderTracking() {
       toast.error('Por favor, ingrese el nombre o archivo del comprobante.');
       return;
     }
-    if (receiptFile) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64Data = reader.result as string;
-        submitPaymentReceipt(order.id, type, paymentMethod, base64Data);
-        toast.success('Comprobante enviado correctamente. Pendiente de verificación.');
-        setReceiptName('');
-        setReceiptFile(null);
-      };
-      reader.onerror = () => {
-        toast.error('Error al procesar el archivo del comprobante.');
-      };
-      reader.readAsDataURL(receiptFile);
-    } else {
-      submitPaymentReceipt(order.id, type, paymentMethod, receiptName);
-      toast.success('Comprobante enviado correctamente. Pendiente de verificación.');
-      setReceiptName('');
-    }
+    triggerConfirm(
+      'Enviar Comprobante',
+      `¿Desea confirmar el envío del comprobante de pago para la ${type}?`,
+      () => {
+        if (receiptFile) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const base64Data = reader.result as string;
+            submitPaymentReceipt(order.id, type, paymentMethod, base64Data);
+            toast.success('Comprobante enviado correctamente. Pendiente de verificación.');
+            setReceiptName('');
+            setReceiptFile(null);
+          };
+          reader.onerror = () => {
+            toast.error('Error al procesar el archivo del comprobante.');
+          };
+          reader.readAsDataURL(receiptFile);
+        } else {
+          submitPaymentReceipt(order.id, type, paymentMethod, receiptName);
+          toast.success('Comprobante enviado correctamente. Pendiente de verificación.');
+          setReceiptName('');
+        }
+      }
+    );
   };
 
   const handleAcceptQuote = () => {
@@ -164,8 +198,14 @@ export function OrderTracking() {
         return;
       }
     }
-    acceptQuotation(order.id);
-    toast.success('Presupuesto aprobado. El pedido está ahora "Pendiente de Seña (50%)".');
+    triggerConfirm(
+      'Aceptar Presupuesto',
+      '¿Desea confirmar la aceptación de este presupuesto? Esto habilitará el pago de la seña.',
+      () => {
+        acceptQuotation(order.id);
+        toast.success('Presupuesto aprobado. El pedido está ahora "Pendiente de Seña (50%)".');
+      }
+    );
   };
 
   const handleRejectQuoteSubmit = (e: React.FormEvent) => {
@@ -174,10 +214,16 @@ export function OrderTracking() {
       toast.error('Indique el motivo del rechazo');
       return;
     }
-    rejectQuotation(order.id, rejectReason);
-    toast.success('Presupuesto rechazado. Pedido cancelado.');
-    setIsRejectModalOpen(false);
-    setRejectReason('');
+    triggerConfirm(
+      'Rechazar Presupuesto',
+      '¿Desea confirmar el rechazo de esta cotización? Esta acción cancelará definitivamente el pedido.',
+      () => {
+        rejectQuotation(order.id, rejectReason);
+        toast.success('Presupuesto rechazado. Pedido cancelado.');
+        setIsRejectModalOpen(false);
+        setRejectReason('');
+      }
+    );
   };
 
   const handleRedesignSubmit = (e: React.FormEvent) => {
@@ -186,10 +232,16 @@ export function OrderTracking() {
       toast.error('Indique los cambios requeridos');
       return;
     }
-    requestQuotationModifications(order.id, redesignComments);
-    toast.success('Solicitud de modificaciones enviada. El estado es "En Rediseño".');
-    setIsRedesignModalOpen(false);
-    setRedesignComments('');
+    triggerConfirm(
+      'Solicitar Modificaciones',
+      '¿Desea enviar la solicitud de modificaciones para este diseño?',
+      () => {
+        requestQuotationModifications(order.id, redesignComments);
+        toast.success('Solicitud de modificaciones enviada. El estado es "En Rediseño".');
+        setIsRedesignModalOpen(false);
+        setRedesignComments('');
+      }
+    );
   };
 
   const handleDownloadPDF = () => {
@@ -931,6 +983,38 @@ export function OrderTracking() {
             </div>
           </Modal>
         )}
+
+        {/* Confirmation Modal */}
+        <Modal
+          isOpen={confirmDialog.isOpen}
+          onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+          title={confirmDialog.title}
+          size="sm"
+        >
+          <div className="space-y-4">
+            <p className="text-sm text-[#A0A0A0]">{confirmDialog.message}</p>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                className="bg-[#FF1744] hover:bg-[#D50032] font-bold"
+                onClick={() => {
+                  confirmDialog.onConfirm();
+                  setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+                }}
+              >
+                Confirmar
+              </Button>
+            </div>
+          </div>
+        </Modal>
       </div>
     </DashboardLayout>
   );

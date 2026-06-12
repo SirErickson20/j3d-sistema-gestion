@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import { Modal } from '../../components/ui/Modal';
 import { Input, Select } from '../../components/ui/Input';
 import {
   Calculator,
@@ -69,6 +70,28 @@ export function QuotationBuilder() {
 
   // RF10 Prototypes / Attachments
   const [attachments, setAttachments] = useState<{ name: string; dataUrl: string; type: string }[]>([]);
+
+  // Confirmation state
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
+
+  const triggerConfirm = (title: string, message: string, onConfirm: () => void) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      onConfirm
+    });
+  };
 
   // ── Configurable cost rates (persisted in localStorage) ──────────────────
   const [showRates, setShowRates] = useState(false);
@@ -157,29 +180,35 @@ export function QuotationBuilder() {
       return;
     }
 
-    createQuotation(
-      selectedOrderId,
-      weight,
-      printTime,
-      material,
-      margin,
-      customPrice !== '' ? Number(customPrice) : undefined,
-      customDate || getSuggestedDate(),
-      undefined,
-      undefined,
-      undefined,
-      attachments
+    triggerConfirm(
+      'Enviar Cotización',
+      `¿Desea confirmar el envío del presupuesto de ${formatCurrency(finalPrice)} para el pedido ${selectedOrderId}?`,
+      () => {
+        createQuotation(
+          selectedOrderId,
+          weight,
+          printTime,
+          material,
+          margin,
+          customPrice !== '' ? Number(customPrice) : undefined,
+          customDate || getSuggestedDate(),
+          undefined,
+          undefined,
+          undefined,
+          attachments
+        );
+
+        toast.success(`Cotización enviada correctamente para el pedido ${selectedOrderId}`);
+
+        setSelectedOrderId('');
+        setWeight(150);
+        setInputHours(8);
+        setInputMinutes(0);
+        setCustomPrice('');
+        setCustomDate('');
+        setAttachments([]);
+      }
     );
-
-    toast.success(`Cotización enviada correctamente para el pedido ${selectedOrderId}`);
-
-    setSelectedOrderId('');
-    setWeight(150);
-    setInputHours(8);
-    setInputMinutes(0);
-    setCustomPrice('');
-    setCustomDate('');
-    setAttachments([]);
   };
 
   return (
@@ -634,6 +663,37 @@ export function QuotationBuilder() {
           </div>
         )}
       </div>
+      {/* Confirmation Modal */}
+      <Modal
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+        title={confirmDialog.title}
+        size="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-[#A0A0A0]">{confirmDialog.message}</p>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              className="bg-[#FF1744] hover:bg-[#D50032] font-bold"
+              onClick={() => {
+                confirmDialog.onConfirm();
+                setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+              }}
+            >
+              Confirmar
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </DashboardLayout>
   );
 }

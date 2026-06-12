@@ -50,6 +50,28 @@ export function OrderManagement() {
   const [rejectPaymentReason, setRejectPaymentReason] = useState('');
   const [isRejectPaymentOpen, setIsRejectPaymentOpen] = useState(false);
 
+  // Confirmation state
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
+
+  const triggerConfirm = (title: string, message: string, onConfirm: () => void) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      onConfirm
+    });
+  };
+
   const handleViewFullImage = (fileUrl: string) => {
     const newTab = window.open();
     if (newTab) {
@@ -161,30 +183,55 @@ export function OrderManagement() {
 
   const handleStatusChange = (status: OrderStatus) => {
     if (!selectedOrder) return;
-    updateOrderStatus(selectedOrder.id, status, 'operator');
-    setSelectedOrder(prev => prev ? { ...prev, status } : null);
-    toast.success(`Estado del pedido actualizado a "${status}"`);
+    const statusLabels: Record<OrderStatus, string> = {
+      pending_quotation: 'Pendiente de Presupuesto',
+      quotation_sent: 'Presupuesto Enviado',
+      pending_approval: 'En Rediseño',
+      pending_deposit: 'Pendiente de Seña',
+      deposit_verification: 'Seña Pendiente de Verificación',
+      in_production: 'En Producción',
+      pending_balance: 'Pendiente de Saldo',
+      finished: 'Finalizado',
+      balance_verification: 'Saldo Pendiente de Verificación',
+      delivered: 'Entregado',
+      cancelled: 'Cancelado'
+    };
+    triggerConfirm(
+      'Cambiar Estado',
+      `¿Desea confirmar el cambio de estado del pedido a "${statusLabels[status]}"?`,
+      () => {
+        updateOrderStatus(selectedOrder.id, status, 'operator');
+        setSelectedOrder(prev => prev ? { ...prev, status } : null);
+        toast.success(`Estado del pedido actualizado a "${statusLabels[status]}"`);
+      }
+    );
   };
 
   const handleApprovePayment = (type: 'seña' | 'saldo') => {
     if (!selectedOrder) return;
-    verifyPayment(selectedOrder.id, type, 'approve');
-    setSelectedOrder(prev => {
-      if (!prev) return null;
-      const depositVal = type === 'seña' ? prev.totalPrice * 0.5 : prev.depositPaid;
-      const remainVal = type === 'seña' ? prev.totalPrice * 0.5 : 0;
-      const statusVal = type === 'seña' ? 'in_production' : 'finished';
-      const payStatusVal = type === 'seña' ? 'partial' : 'completed';
-      return {
-        ...prev,
-        status: statusVal,
-        depositPaid: depositVal,
-        remainingBalance: remainVal,
-        paymentStatus: payStatusVal
-      };
-    });
-    toast.success(`Pago de ${type === 'seña' ? 'Seña' : 'Saldo'} aprobado correctamente.`);
-    setIsDetailOpen(false);
+    triggerConfirm(
+      'Aprobar Pago',
+      `¿Desea confirmar la aprobación y validación del pago de la ${type === 'seña' ? 'Seña' : 'Saldo'}?`,
+      () => {
+        verifyPayment(selectedOrder.id, type, 'approve');
+        setSelectedOrder(prev => {
+          if (!prev) return null;
+          const depositVal = type === 'seña' ? prev.totalPrice * 0.5 : prev.depositPaid;
+          const remainVal = type === 'seña' ? prev.totalPrice * 0.5 : 0;
+          const statusVal = type === 'seña' ? 'in_production' : 'finished';
+          const payStatusVal = type === 'seña' ? 'partial' : 'completed';
+          return {
+            ...prev,
+            status: statusVal,
+            depositPaid: depositVal,
+            remainingBalance: remainVal,
+            paymentStatus: payStatusVal
+          };
+        });
+        toast.success(`Pago de ${type === 'seña' ? 'Seña' : 'Saldo'} aprobado correctamente.`);
+        setIsDetailOpen(false);
+      }
+    );
   };
 
   const handleRejectPaymentSubmit = (e: React.FormEvent, type: 'seña' | 'saldo') => {
@@ -194,48 +241,56 @@ export function OrderManagement() {
       toast.error('Indique el motivo del rechazo');
       return;
     }
-    verifyPayment(selectedOrder.id, type, 'reject', rejectPaymentReason);
-    setSelectedOrder(prev => {
-      if (!prev) return null;
-      const statusVal = type === 'seña' ? 'pending_deposit' : 'pending_balance';
-      return {
-        ...prev,
-        status: statusVal,
-        paymentStatus: 'invalidated'
-      };
-    });
-    toast.success(`Pago de ${type === 'seña' ? 'Seña' : 'Saldo'} rechazado correctamente.`);
-    setIsRejectPaymentOpen(false);
-    setRejectPaymentReason('');
-    setIsDetailOpen(false);
+    triggerConfirm(
+      'Rechazar Pago',
+      `¿Desea confirmar el rechazo de este comprobante de pago de la ${type === 'seña' ? 'Seña' : 'Saldo'}?`,
+      () => {
+        verifyPayment(selectedOrder.id, type, 'reject', rejectPaymentReason);
+        setSelectedOrder(prev => {
+          if (!prev) return null;
+          const statusVal = type === 'seña' ? 'pending_deposit' : 'pending_balance';
+          return {
+            ...prev,
+            status: statusVal,
+            paymentStatus: 'invalidated'
+          };
+        });
+        toast.success(`Pago de ${type === 'seña' ? 'Seña' : 'Saldo'} rechazado correctamente.`);
+        setIsRejectPaymentOpen(false);
+        setRejectPaymentReason('');
+        setIsDetailOpen(false);
+      }
+    );
   };
 
   const handleCancelSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedOrder) return;
-
     if (!cancelReason.trim()) {
       toast.error('Debe indicar el motivo de cancelación');
       return;
     }
-
-    updateOrderStatus(selectedOrder.id, 'cancelled', 'operator', cancelReason);
-    
-    const now = new Date().toISOString();
-    setSelectedOrder(prev => prev ? {
-      ...prev,
-      status: 'cancelled',
-      cancellation: {
-        reason: cancelReason,
-        date: now,
-        cancelledByRole: 'operator'
+    triggerConfirm(
+      'Cancelar Pedido',
+      '¿Desea confirmar la cancelación definitiva de este pedido?',
+      () => {
+        updateOrderStatus(selectedOrder.id, 'cancelled', 'operator', cancelReason);
+        const now = new Date().toISOString();
+        setSelectedOrder(prev => prev ? {
+          ...prev,
+          status: 'cancelled',
+          cancellation: {
+            reason: cancelReason,
+            date: now,
+            cancelledByRole: 'operator'
+          }
+        } : null);
+        toast.success('Pedido cancelado correctamente');
+        setIsCancelOpen(false);
+        setIsDetailOpen(false);
+        setCancelReason('');
       }
-    } : null);
-
-    toast.success('Pedido cancelado correctamente');
-    setIsCancelOpen(false);
-    setIsDetailOpen(false);
-    setCancelReason('');
+    );
   };
 
   return (
@@ -558,15 +613,21 @@ export function OrderManagement() {
                 )}
                 {selectedOrder.status === 'pending_balance' && (
                   <Button size="sm" variant="primary" className="bg-[#4ADE80] hover:bg-[#22C55E]" onClick={() => {
-                    verifyPayment(selectedOrder.id, 'saldo', 'approve');
-                    setSelectedOrder(prev => prev ? {
-                      ...prev,
-                      status: 'finished',
-                      depositPaid: prev.totalPrice,
-                      remainingBalance: 0,
-                      paymentStatus: 'completed'
-                    } : null);
-                    toast.success('Pago de saldo aprobado. Pedido Finalizado.');
+                    triggerConfirm(
+                      'Aprobar Pago de Saldo',
+                      '¿Desea confirmar la aprobación del pago de saldo y marcar el pedido como Finalizado?',
+                      () => {
+                        verifyPayment(selectedOrder.id, 'saldo', 'approve');
+                        setSelectedOrder(prev => prev ? {
+                          ...prev,
+                          status: 'finished',
+                          depositPaid: prev.totalPrice,
+                          remainingBalance: 0,
+                          paymentStatus: 'completed'
+                        } : null);
+                        toast.success('Pago de saldo aprobado. Pedido Finalizado.');
+                      }
+                    );
                   }}>
                     Aprobar Pago de Saldo (Finalizado)
                   </Button>
@@ -637,6 +698,38 @@ export function OrderManagement() {
             </form>
           </Modal>
         )}
+
+        {/* Confirmation Modal */}
+        <Modal
+          isOpen={confirmDialog.isOpen}
+          onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+          title={confirmDialog.title}
+          size="sm"
+        >
+          <div className="space-y-4">
+            <p className="text-sm text-[#A0A0A0]">{confirmDialog.message}</p>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                className="bg-[#FF1744] hover:bg-[#D50032] font-bold"
+                onClick={() => {
+                  confirmDialog.onConfirm();
+                  setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+                }}
+              >
+                Confirmar
+              </Button>
+            </div>
+          </div>
+        </Modal>
       </div>
     </DashboardLayout>
   );

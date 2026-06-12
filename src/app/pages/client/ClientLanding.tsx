@@ -73,6 +73,28 @@ export function ClientLanding() {
   const [createdOrderCode, setCreatedOrderCode] = useState<string | null>(null);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
+  // Confirmation state
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
+
+  const triggerConfirm = (title: string, message: string, onConfirm: () => void) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      onConfirm
+    });
+  };
+
   // Search tracking logic
   const handleTrackingLookup = (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,37 +153,43 @@ export function ClientLanding() {
       return;
     }
 
-    const newOrder = createCatalogOrder(
-      selectedProduct.id,
-      selectedProduct.name,
-      catalogQty,
-      catalogMaterial,
-      catalogColor,
-      catalogDelivery,
-      catalogAddress,
-      catalogNotes,
-      catalogName,
-      catalogEmail,
-      catalogPhone
+    triggerConfirm(
+      'Confirmar Pedido',
+      `¿Desea confirmar el pedido de ${catalogQty}x "${selectedProduct.name}"?`,
+      () => {
+        const newOrder = createCatalogOrder(
+          selectedProduct.id,
+          selectedProduct.name,
+          catalogQty,
+          catalogMaterial,
+          catalogColor,
+          catalogDelivery,
+          catalogAddress,
+          catalogNotes,
+          catalogName,
+          catalogEmail,
+          catalogPhone
+        );
+
+        setCreatedOrderCode(newOrder.id);
+        setIsSuccessModalOpen(true);
+
+        // Simular el envío de correo silencioso al Gmail del cliente
+        console.log(`%c[SIMULACIÓN EMAIL] Correo enviado exitosamente a ${catalogEmail} con el código de seguimiento: ${newOrder.id}`, 'color: #22c55e; font-weight: bold;');
+
+        // Reset fields
+        setCatalogQty(1);
+        setCatalogMaterial('PLA');
+        setCatalogColor('Blanco');
+        setCatalogDelivery('pickup');
+        setCatalogAddress('');
+        setCatalogNotes('');
+        setCatalogName('');
+        setCatalogEmail('');
+        setCatalogPhone('');
+        setIsCatalogModalOpen(false);
+      }
     );
-
-    setCreatedOrderCode(newOrder.id);
-    setIsSuccessModalOpen(true);
-
-    // Simular el envío de correo silencioso al Gmail del cliente
-    console.log(`%c[SIMULACIÓN EMAIL] Correo enviado exitosamente a ${catalogEmail} con el código de seguimiento: ${newOrder.id}`, 'color: #22c55e; font-weight: bold;');
-
-    // Reset fields
-    setCatalogQty(1);
-    setCatalogMaterial('PLA');
-    setCatalogColor('Blanco');
-    setCatalogDelivery('pickup');
-    setCatalogAddress('');
-    setCatalogNotes('');
-    setCatalogName('');
-    setCatalogEmail('');
-    setCatalogPhone('');
-    setIsCatalogModalOpen(false);
   };
 
   // File Upload with validation (format & size)
@@ -237,58 +265,64 @@ export function ClientLanding() {
     const typeIdx = parseInt(customType) - 1;
     const pieceTypeName = typeNames[typeIdx] || 'Pieza Personalizada';
 
-    // Helper to read files as base64
-    const readFilesAsBase64 = async (files: File[]): Promise<string[]> => {
-      const promises = files.map(file => {
-        return new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = error => reject(error);
-          reader.readAsDataURL(file);
-        });
-      });
-      return Promise.all(promises);
-    };
+    triggerConfirm(
+      'Confirmar Solicitud',
+      `¿Desea confirmar el envío del pedido personalizado para "${pieceTypeName}"?`,
+      async () => {
+        // Helper to read files as base64
+        const readFilesAsBase64 = async (files: File[]): Promise<string[]> => {
+          const promises = files.map(file => {
+            return new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.onerror = error => reject(error);
+              reader.readAsDataURL(file);
+            });
+          });
+          return Promise.all(promises);
+        };
 
-    try {
-      const base64Files = await readFilesAsBase64(customFiles);
+        try {
+          const base64Files = await readFilesAsBase64(customFiles);
 
-      const newOrder = createCustomOrder(
-        pieceTypeName,
-        customMaterial,
-        customColor,
-        customQty,
-        customDesc,
-        base64Files,
-        customName,
-        customEmail,
-        customPhone
-      );
+          const newOrder = createCustomOrder(
+            pieceTypeName,
+            customMaterial,
+            customColor,
+            customQty,
+            customDesc,
+            base64Files,
+            customName,
+            customEmail,
+            customPhone
+          );
 
-      setCreatedOrderCode(newOrder.id);
-      setIsSuccessModalOpen(true);
+          setCreatedOrderCode(newOrder.id);
+          setIsSuccessModalOpen(true);
 
-      // Simular el envío de correo silencioso al Gmail del cliente
-      console.log(`%c[SIMULACIÓN EMAIL] Correo enviado exitosamente a ${customEmail} con el código de seguimiento: ${newOrder.id}`, 'color: #22c55e; font-weight: bold;');
+          // Simular el envío de correo silencioso al Gmail del cliente
+          console.log(`%c[SIMULACIÓN EMAIL] Correo enviado exitosamente a ${customEmail} con el código de seguimiento: ${newOrder.id}`, 'color: #22c55e; font-weight: bold;');
 
-      // Reset Form
-      setCustomName('');
-      setCustomEmail('');
-      setCustomPhone('');
-      setCustomType('1');
-      setCustomDesc('');
-      setCustomFiles([]);
-      setCustomFilePreviews([]);
-      setCustomMaterial('PLA');
-      setCustomMaterialMult(1.0);
-      setCustomColor('Blanco');
-      setCustomFinish('1');
-      setCustomQty(1);
-      setUploadError(false);
-    } catch (err) {
-      console.error(err);
-      toast.error('Error al procesar los archivos de imagen. Intente de nuevo.');
-    }
+          // Reset Form
+          setCustomName('');
+          setCustomEmail('');
+          setCustomPhone('');
+          setCustomType('1');
+          setCustomDesc('');
+          setCustomFiles([]);
+          setCustomFilePreviews([]);
+          setCustomMaterial('PLA');
+          setCustomMaterialMult(1.0);
+          setCustomColor('Blanco');
+          setCustomFinish('1');
+          setCustomQty(1);
+          setUploadError(false);
+        } catch (err) {
+          console.error(err);
+          toast.error('Error al procesar los archivos de imagen. Intente de nuevo.');
+        }
+      }
+    );
   };
 
   return (
@@ -1122,6 +1156,38 @@ export function ClientLanding() {
             >
               Seguimiento de Pedido
               <ExternalLink className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Confirmation Modal */}
+      <Modal
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+        title={confirmDialog.title}
+        size="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-[#A0A0A0]">{confirmDialog.message}</p>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              className="bg-[#FF1744] hover:bg-[#D50032] font-bold"
+              onClick={() => {
+                confirmDialog.onConfirm();
+                setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+              }}
+            >
+              Confirmar
             </Button>
           </div>
         </div>
