@@ -316,7 +316,7 @@ export function OrderTracking() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-3xl font-bold text-white">Seguimiento de Pedido</h1>
+              <h1 className="text-3xl font-bold text-white">Consultá tu Pedido</h1>
               <span className="text-xs text-[#A0A0A0] bg-[#151515] px-2 py-1 rounded-md border border-[rgba(255,255,255,0.08)]">
                 {order.specifications?.pieceType ? 'Personalizado' : 'Catálogo'}
               </span>

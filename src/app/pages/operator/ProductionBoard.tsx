@@ -1,71 +1,10 @@
-import { useState } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { Card } from '../../components/ui/Card';
-import { OrderStatusBadge, PaymentStatusBadge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
-import { Modal } from '../../components/ui/Modal';
-import { Package, User, Calendar, DollarSign, ArrowRight } from 'lucide-react';
+import { PaymentStatusBadge } from '../../components/ui/Badge';
+import { User, Calendar, DollarSign } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import { OrderStatus } from '../../types';
-import { toast } from 'sonner';
-
-const getAllowedNextStatuses = (current: OrderStatus): { value: OrderStatus; label: string }[] => {
-  switch (current) {
-    case 'in_production':
-      return [
-        { value: 'in_production', label: 'En Producción' },
-        { value: 'pending_balance', label: 'Listo (Pte. Saldo)' },
-        { value: 'cancelled', label: 'Cancelar' }
-      ];
-    case 'pending_balance':
-      return [
-        { value: 'pending_balance', label: 'Pendiente de Saldo' },
-        { value: 'finished', label: 'Aprobar Pago (Finalizado)' },
-        { value: 'cancelled', label: 'Cancelar' }
-      ];
-    case 'finished':
-      return [
-        { value: 'finished', label: 'Finalizado' },
-        { value: 'delivered', label: 'Entregado' },
-        { value: 'cancelled', label: 'Cancelar' }
-      ];
-    case 'pending_deposit':
-    case 'deposit_verification':
-      return [
-        { value: current, label: current === 'pending_deposit' ? 'Pendiente Seña' : 'Seña por Verificar' },
-        { value: 'in_production', label: 'En Producción' },
-        { value: 'cancelled', label: 'Cancelar' }
-      ];
-    case 'pending_quotation':
-      return [
-        { value: 'pending_quotation', label: 'Pendiente Presupuesto' },
-        { value: 'cancelled', label: 'Cancelar' }
-      ];
-    case 'pending_approval':
-      return [
-        { value: 'pending_approval', label: 'En Rediseño' },
-        { value: 'cancelled', label: 'Cancelar' }
-      ];
-    case 'quotation_sent':
-      return [
-        { value: 'quotation_sent', label: 'Presupuesto Enviado' },
-        { value: 'cancelled', label: 'Cancelar' }
-      ];
-    case 'balance_verification':
-      return [
-        { value: 'balance_verification', label: 'Saldo por Verificar' },
-        { value: 'finished', label: 'Aprobar Pago (Finalizado)' },
-        { value: 'cancelled', label: 'Cancelar' }
-      ];
-    case 'delivered':
-      return [{ value: 'delivered', label: 'Entregado' }];
-    case 'cancelled':
-      return [{ value: 'cancelled', label: 'Cancelado' }];
-    default:
-      return [];
-  }
-};
 
 const columns: { id: OrderStatus; label: string; color: string }[] = [
   { id: 'pending_quotation', label: 'Pte. Presupuesto', color: '#A0A0A0' },
@@ -79,29 +18,7 @@ const columns: { id: OrderStatus; label: string; color: string }[] = [
 ];
 
 export function ProductionBoard() {
-  const { orders, updateOrderStatus, currentUser } = useApp();
-
-  // Confirmation state
-  const [confirmDialog, setConfirmDialog] = useState<{
-    isOpen: boolean;
-    title: string;
-    message: string;
-    onConfirm: () => void;
-  }>({
-    isOpen: false,
-    title: '',
-    message: '',
-    onConfirm: () => {}
-  });
-
-  const triggerConfirm = (title: string, message: string, onConfirm: () => void) => {
-    setConfirmDialog({
-      isOpen: true,
-      title,
-      message,
-      onConfirm
-    });
-  };
+  const { orders, currentUser } = useApp();
 
   const getOrdersByStatus = (status: OrderStatus) => {
     return orders.filter((order) => {
@@ -115,34 +32,6 @@ export function ProductionBoard() {
     });
   };
 
-  const handleMoveStatus = (orderId: string, newStatus: OrderStatus) => {
-    const order = orders.find(o => o.id === orderId);
-    if (!order || order.status === newStatus) return;
-
-    const statusLabels: Record<OrderStatus, string> = {
-      pending_quotation: 'Pendiente de Presupuesto',
-      quotation_sent: 'Presupuesto Enviado',
-      pending_approval: 'En Rediseño',
-      pending_deposit: 'Pendiente de Seña',
-      deposit_verification: 'Seña Pendiente de Verificación',
-      in_production: 'En Producción',
-      pending_balance: 'Listo (Pte. Saldo)',
-      finished: 'Aprobar Pago (Finalizado)',
-      balance_verification: 'Saldo Pendiente de Verificación',
-      delivered: 'Entregado',
-      cancelled: 'Cancelar'
-    };
-
-    triggerConfirm(
-      'Mover Estado de Pedido',
-      `¿Desea confirmar la actualización del estado del pedido #${orderId} a "${statusLabels[newStatus]}"?`,
-      () => {
-        updateOrderStatus(orderId, newStatus, 'operator');
-        toast.success(`Pedido ${orderId} movido a "${statusLabels[newStatus]}"`);
-      }
-    );
-  };
-
   return (
     <DashboardLayout userName={currentUser?.name || 'Operador'} userRole="operator">
       <div className="space-y-6">
@@ -150,7 +39,7 @@ export function ProductionBoard() {
         <div>
           <h1 className="text-3xl font-bold text-white mb-2"><br />Tablero de Producción</h1>
           <p className="text-[#A0A0A0] text-sm">
-            Gestiona el flujo de trabajo de todos los pedidos en tiempo real
+            Visualizá el flujo de trabajo de todos los pedidos en tiempo real
           </p>
         </div>
 
@@ -223,7 +112,7 @@ export function ProductionBoard() {
                       </div>
 
                       {/* Order Details (Stacked & Compact) */}
-                      <div className="space-y-1 mb-3 text-[10px] text-[#A0A0A0]">
+                      <div className="space-y-1 text-[10px] text-[#A0A0A0]">
                         <div className="flex items-center gap-1.5 truncate">
                           <User className="w-3 h-3 text-[#FF1744] shrink-0" />
                           <span className="truncate">{order.customerName}</span>
@@ -242,22 +131,6 @@ export function ProductionBoard() {
                           )}
                         </div>
                       </div>
-
-                      {/* Status select dropdown */}
-                      <div className="pt-2.5 border-t border-white/5 space-y-1">
-                        <label className="block text-[8px] text-[#A0A0A0] font-bold uppercase tracking-wider">Mover a:</label>
-                        <select
-                          value={order.status}
-                          onChange={(e) => handleMoveStatus(order.id, e.target.value as OrderStatus)}
-                          className="w-full text-[10px] bg-[#151515] border border-white/10 rounded px-1.5 py-1 text-white focus:outline-none cursor-pointer"
-                        >
-                          {getAllowedNextStatuses(order.status).map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
                     </Card>
                   ))}
 
@@ -272,38 +145,6 @@ export function ProductionBoard() {
           })}
         </div>
       </div>
-      {/* Confirmation Modal */}
-      <Modal
-        isOpen={confirmDialog.isOpen}
-        onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
-        title={confirmDialog.title}
-        size="sm"
-      >
-        <div className="space-y-4">
-          <p className="text-sm text-[#A0A0A0]">{confirmDialog.message}</p>
-          <div className="flex justify-end gap-3 pt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
-            >
-              Cancelar
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              className="bg-[#FF1744] hover:bg-[#D50032] font-bold"
-              onClick={() => {
-                confirmDialog.onConfirm();
-                setConfirmDialog(prev => ({ ...prev, isOpen: false }));
-              }}
-            >
-              Confirmar
-            </Button>
-          </div>
-        </div>
-      </Modal>
     </DashboardLayout>
   );
 }
-

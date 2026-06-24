@@ -32,16 +32,16 @@ export function OperatorHome() {
       desc: 'Visualizar cola de impresión y estados de fabricación.'
     },
     {
+      label: 'Historial de Pagos',
+      path: '/admin/finances',
+      icon: CreditCard,
+      desc: 'Historial financiero, cobros, señas y saldos.'
+    },
+    {
       label: 'Reportes',
       path: '/admin/reports',
       icon: TrendingUp,
       desc: 'Análisis de ventas, métricas e indicadores de rendimiento.'
-    },
-    {
-      label: 'Finanzas',
-      path: '/admin/finances',
-      icon: CreditCard,
-      desc: 'Historial financiero, cobros, señas y saldos.'
     }
   ];
 

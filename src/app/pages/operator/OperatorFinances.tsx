@@ -31,7 +31,7 @@ export function OperatorFinances() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2"><br />Historial Financiero</h1>
+          <h1 className="text-3xl font-bold text-white mb-2"><br />Historial de Pagos</h1>
           <p className="text-[#A0A0A0]">Historial de facturación, señas y saldos de todos los pedidos</p>
         </div>
 

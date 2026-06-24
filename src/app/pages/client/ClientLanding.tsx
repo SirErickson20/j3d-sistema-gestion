@@ -1154,7 +1154,7 @@ export function ClientLanding() {
               }}
               className="bg-[#FF1744] hover:bg-[#D50032] text-xs font-bold flex items-center gap-1 shadow-md shadow-[#FF1744]/20"
             >
-              Seguimiento de Pedido
+              Consultá tu pedido
               <ExternalLink className="w-3.5 h-3.5" />
             </Button>
           </div>

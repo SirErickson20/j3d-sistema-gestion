@@ -34,8 +34,8 @@ export function Sidebar({ userRole }: SidebarProps) {
     { icon: ShoppingCart, label: 'Pedidos', path: '/admin/orders' },
     { icon: Calculator, label: 'Cotizaciones', path: '/admin/quotations' },
     { icon: Boxes, label: 'Producción', path: '/admin/production' },
+    { icon: CreditCard, label: 'Historial de Pagos', path: '/admin/finances' },
     { icon: TrendingUp, label: 'Reportes', path: '/admin/reports' },
-    { icon: CreditCard, label: 'Finanzas', path: '/admin/finances' },
   ];
 
   const links = userRole === 'client' ? clientLinks : operatorLinks;

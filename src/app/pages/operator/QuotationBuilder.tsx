@@ -3,7 +3,7 @@ import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
-import { Input, Select } from '../../components/ui/Input';
+import { Input } from '../../components/ui/Input';
 import {
   Calculator,
   Settings,
@@ -14,10 +14,8 @@ import {
   ChevronUp,
   Save,
   RotateCcw,
-  Package,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { materials } from '../../data/mockData';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import { toast } from 'sonner';
 
@@ -26,12 +24,9 @@ const DEFAULT_RATES = {
   electricityPerHour: 250,
   laborPerHour: 1000,
   machineWearPerHour: 375,
+  productionPerMinute: 5,
+  materialPerGram: 0.05,
 };
-
-// Default material costs per gram (matches mockData)
-const DEFAULT_MATERIAL_COSTS: Record<string, number> = Object.fromEntries(
-  materials.map((m) => [m.id, m.costPerGram])
-);
 
 function loadRates() {
   try {
@@ -39,14 +34,6 @@ function loadRates() {
     if (stored) return { ...DEFAULT_RATES, ...JSON.parse(stored) };
   } catch { /* ignore */ }
   return { ...DEFAULT_RATES };
-}
-
-function loadMaterialCosts(): Record<string, number> {
-  try {
-    const stored = localStorage.getItem('j3d_material_costs');
-    if (stored) return { ...DEFAULT_MATERIAL_COSTS, ...JSON.parse(stored) };
-  } catch { /* ignore */ }
-  return { ...DEFAULT_MATERIAL_COSTS };
 }
 
 export function QuotationBuilder() {
@@ -100,18 +87,17 @@ export function QuotationBuilder() {
   const [rateElectricity, setRateElectricity] = useState(saved.electricityPerHour);
   const [rateLabor, setRateLabor] = useState(saved.laborPerHour);
   const [rateMachineWear, setRateMachineWear] = useState(saved.machineWearPerHour);
-
-  // ── Configurable material costs (persisted in localStorage) ───────────────
-  const savedMats = loadMaterialCosts();
-  const [materialCosts, setMaterialCosts] = useState<Record<string, number>>(savedMats);
+  const [rateProductionPerMinute, setRateProductionPerMinute] = useState(saved.productionPerMinute);
+  const [materialPricePerGram, setMaterialPricePerGram] = useState(saved.materialPerGram);
 
   const handleSaveRates = () => {
     localStorage.setItem('j3d_cost_rates', JSON.stringify({
       electricityPerHour: rateElectricity,
       laborPerHour: rateLabor,
       machineWearPerHour: rateMachineWear,
+      productionPerMinute: rateProductionPerMinute,
+      materialPerGram: materialPricePerGram,
     }));
-    localStorage.setItem('j3d_material_costs', JSON.stringify(materialCosts));
     toast.success('Tarifas y costos guardados correctamente.');
   };
 
@@ -119,9 +105,9 @@ export function QuotationBuilder() {
     setRateElectricity(DEFAULT_RATES.electricityPerHour);
     setRateLabor(DEFAULT_RATES.laborPerHour);
     setRateMachineWear(DEFAULT_RATES.machineWearPerHour);
-    setMaterialCosts({ ...DEFAULT_MATERIAL_COSTS });
+    setRateProductionPerMinute(DEFAULT_RATES.productionPerMinute);
+    setMaterialPricePerGram(DEFAULT_RATES.materialPerGram);
     localStorage.removeItem('j3d_cost_rates');
-    localStorage.removeItem('j3d_material_costs');
     toast.info('Tarifas restablecidas a valores por defecto.');
   };
 
@@ -160,12 +146,12 @@ export function QuotationBuilder() {
     return `${h}h ${m}min`;
   };
 
-  const materialCostPerGram = (materialCosts[materials.find(m => m.name === material)?.id || ''] ?? materials.find((m) => m.name === material)?.costPerGram ?? 0.05);
-  const materialCost    = weight * materialCostPerGram;
-  const electricityCost = estimatedHours * rateElectricity;
-  const laborCost       = estimatedHours * rateLabor;
-  const machineWearCost = estimatedHours * rateMachineWear;
-  const totalCost       = materialCost + electricityCost + laborCost + machineWearCost;
+  const materialCost      = weight * materialPricePerGram;
+  const electricityCost   = estimatedHours * rateElectricity;
+  const laborCost         = estimatedHours * rateLabor;
+  const machineWearCost   = estimatedHours * rateMachineWear;
+  const productionCost    = estimatedHours * 60 * rateProductionPerMinute;
+  const totalCost         = materialCost + electricityCost + laborCost + machineWearCost + productionCost;
 
   const calculatedPrice = totalCost * (1 + margin / 100);
   const finalPrice = customPrice !== '' ? Number(customPrice) : calculatedPrice;
@@ -236,7 +222,7 @@ export function QuotationBuilder() {
               <div>
                 <p className="text-sm font-semibold text-white">Configuración de Tarifas de Costo</p>
                 <p className="text-[11px] text-[#A0A0A0]">
-                  Electricidad: {formatCurrency(rateElectricity)}/h · Mano de obra: {formatCurrency(rateLabor)}/h · Desgaste: {formatCurrency(rateMachineWear)}/h
+                  Electricidad: {formatCurrency(rateElectricity)}/h · Mano de obra: {formatCurrency(rateLabor)}/h · Desgaste: {formatCurrency(rateMachineWear)}/h · Producción: {formatCurrency(rateProductionPerMinute)}/min · Material: {formatCurrency(materialPricePerGram)}/g
                 </p>
               </div>
             </div>
@@ -247,113 +233,121 @@ export function QuotationBuilder() {
 
           {showRates && (
             <div className="px-6 pb-6 border-t border-[rgba(255,255,255,0.06)]">
-              <p className="text-xs text-[#A0A0A0] mt-4 mb-4">
-                Definí las tarifas por hora que el sistema usará para calcular el costo de cada cotización.
-                Los cambios se aplican inmediatamente y se guardan en este dispositivo.
+              <p className="text-xs text-[#A0A0A0] mt-4 mb-5">
+                Definí las tarifas que el sistema usará para calcular el costo de cada cotización. Se guardan en este dispositivo.
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+              {/* ── 5 tariff cards ── */}
+              <div className="grid grid-cols-2 xl:grid-cols-5 gap-3 mb-5">
+
                 {/* Electricity */}
-                <div className="p-4 bg-[#151515] rounded-xl border border-[rgba(255,255,255,0.08)] space-y-2">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg">⚡</span>
-                    <label className="text-xs font-semibold text-[#FCD34D] uppercase tracking-wider">Electricidad</label>
+                <div className="rounded-xl border border-[rgba(255,255,255,0.08)] bg-[#151515] overflow-hidden">
+                  <div className="h-1 w-full bg-[#FCD34D]" />
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">⚡</span>
+                      <span className="text-[10px] font-bold text-[#FCD34D] uppercase tracking-widest">Electricidad</span>
+                    </div>
+                    <p className="text-2xl font-bold text-white leading-none">{formatCurrency(rateElectricity)}<span className="text-xs font-normal text-[#A0A0A0] ml-1">/h</span></p>
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-[#666]">$</span>
+                      <input type="number" min="0" value={rateElectricity} onChange={(e) => setRateElectricity(Number(e.target.value))}
+                        className="w-full pl-6 pr-8 py-1.5 bg-[#0B0B0B] border border-[rgba(255,255,255,0.08)] rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#FCD34D]/40" />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-[#666]">/h</span>
+                    </div>
+                    <p className="text-[9px] text-[#555] leading-tight">Energía por hora de impresión estimada</p>
                   </div>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#A0A0A0]">$</span>
-                    <input
-                      type="number"
-                      min="0"
-                      value={rateElectricity}
-                      onChange={(e) => setRateElectricity(Number(e.target.value))}
-                      className="w-full pl-7 pr-12 py-2 bg-[#0B0B0B] border border-[rgba(255,255,255,0.08)] rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#FCD34D]/30"
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#A0A0A0]">/h</span>
-                  </div>
-                  <p className="text-[10px] text-[#666]">Costo de energía por hora de impresión estimada</p>
                 </div>
 
                 {/* Labor */}
-                <div className="p-4 bg-[#151515] rounded-xl border border-[rgba(255,255,255,0.08)] space-y-2">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg">👷</span>
-                    <label className="text-xs font-semibold text-[#60A5FA] uppercase tracking-wider">Mano de Obra</label>
+                <div className="rounded-xl border border-[rgba(255,255,255,0.08)] bg-[#151515] overflow-hidden">
+                  <div className="h-1 w-full bg-[#60A5FA]" />
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">👷</span>
+                      <span className="text-[10px] font-bold text-[#60A5FA] uppercase tracking-widest">Mano de Obra</span>
+                    </div>
+                    <p className="text-2xl font-bold text-white leading-none">{formatCurrency(rateLabor)}<span className="text-xs font-normal text-[#A0A0A0] ml-1">/h</span></p>
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-[#666]">$</span>
+                      <input type="number" min="0" value={rateLabor} onChange={(e) => setRateLabor(Number(e.target.value))}
+                        className="w-full pl-6 pr-8 py-1.5 bg-[#0B0B0B] border border-[rgba(255,255,255,0.08)] rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#60A5FA]/40" />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-[#666]">/h</span>
+                    </div>
+                    <p className="text-[9px] text-[#555] leading-tight">Mano de obra por hora estimada</p>
                   </div>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#A0A0A0]">$</span>
-                    <input
-                      type="number"
-                      min="0"
-                      value={rateLabor}
-                      onChange={(e) => setRateLabor(Number(e.target.value))}
-                      className="w-full pl-7 pr-12 py-2 bg-[#0B0B0B] border border-[rgba(255,255,255,0.08)] rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#60A5FA]/30"
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#A0A0A0]">/h</span>
-                  </div>
-                  <p className="text-[10px] text-[#666]">Costo de mano de obra por hora estimada</p>
                 </div>
 
                 {/* Machine wear */}
-                <div className="p-4 bg-[#151515] rounded-xl border border-[rgba(255,255,255,0.08)] space-y-2">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg">⚙️</span>
-                    <label className="text-xs font-semibold text-[#34D399] uppercase tracking-wider">Desgaste Máquina</label>
+                <div className="rounded-xl border border-[rgba(255,255,255,0.08)] bg-[#151515] overflow-hidden">
+                  <div className="h-1 w-full bg-[#34D399]" />
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">⚙️</span>
+                      <span className="text-[10px] font-bold text-[#34D399] uppercase tracking-widest">Desgaste</span>
+                    </div>
+                    <p className="text-2xl font-bold text-white leading-none">{formatCurrency(rateMachineWear)}<span className="text-xs font-normal text-[#A0A0A0] ml-1">/h</span></p>
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-[#666]">$</span>
+                      <input type="number" min="0" value={rateMachineWear} onChange={(e) => setRateMachineWear(Number(e.target.value))}
+                        className="w-full pl-6 pr-8 py-1.5 bg-[#0B0B0B] border border-[rgba(255,255,255,0.08)] rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#34D399]/40" />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-[#666]">/h</span>
+                    </div>
+                    <p className="text-[9px] text-[#555] leading-tight">Amortización y mantenimiento de máquina</p>
                   </div>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#A0A0A0]">$</span>
-                    <input
-                      type="number"
-                      min="0"
-                      value={rateMachineWear}
-                      onChange={(e) => setRateMachineWear(Number(e.target.value))}
-                      className="w-full pl-7 pr-12 py-2 bg-[#0B0B0B] border border-[rgba(255,255,255,0.08)] rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#34D399]/30"
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#A0A0A0]">/h</span>
-                  </div>
-                  <p className="text-[10px] text-[#666]">Amortización y mantenimiento por hora estimada</p>
                 </div>
+
+                {/* Production per minute */}
+                <div className="rounded-xl border border-[rgba(255,255,255,0.08)] bg-[#151515] overflow-hidden">
+                  <div className="h-1 w-full bg-[#F97316]" />
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">🖨️</span>
+                      <span className="text-[10px] font-bold text-[#F97316] uppercase tracking-widest">Producción</span>
+                    </div>
+                    <p className="text-2xl font-bold text-white leading-none">{formatCurrency(rateProductionPerMinute)}<span className="text-xs font-normal text-[#A0A0A0] ml-1">/min</span></p>
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-[#666]">$</span>
+                      <input type="number" min="0" step="0.1" value={rateProductionPerMinute} onChange={(e) => setRateProductionPerMinute(Number(e.target.value))}
+                        className="w-full pl-6 pr-10 py-1.5 bg-[#0B0B0B] border border-[rgba(255,255,255,0.08)] rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#F97316]/40" />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-[#666]">/min</span>
+                    </div>
+                    <p className="text-[9px] text-[#555] leading-tight">Costo por minuto de impresión estimada</p>
+                  </div>
+                </div>
+
+                {/* Material per gram */}
+                <div className="rounded-xl border border-[rgba(255,255,255,0.08)] bg-[#151515] overflow-hidden">
+                  <div className="h-1 w-full bg-[#A78BFA]" />
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">🧱</span>
+                      <span className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-widest">Material</span>
+                    </div>
+                    <p className="text-2xl font-bold text-white leading-none">{formatCurrency(materialPricePerGram)}<span className="text-xs font-normal text-[#A0A0A0] ml-1">/g</span></p>
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-[#666]">$</span>
+                      <input type="number" min="0" step="0.001" value={materialPricePerGram} onChange={(e) => setMaterialPricePerGram(Number(e.target.value))}
+                        className="w-full pl-6 pr-7 py-1.5 bg-[#0B0B0B] border border-[rgba(255,255,255,0.08)] rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#A78BFA]/40" />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-[#666]">/g</span>
+                    </div>
+                    <p className="text-[9px] text-[#555] leading-tight">≈ {formatCurrency(materialPricePerGram * 1000)}/kg</p>
+                  </div>
+                </div>
+
               </div>
 
-              {/* Materials section */}
-              <div className="mt-6 pt-5 border-t border-[rgba(255,255,255,0.06)]">
-                <div className="flex items-center gap-2 mb-3">
-                  <Package className="w-4 h-4 text-[#A78BFA]" />
-                  <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-wider">Costo de Materiales ($/kg)</p>
+              {/* Totals summary row */}
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 bg-[rgba(255,255,255,0.03)] rounded-xl border border-[rgba(255,255,255,0.06)] text-xs mb-5">
+                <div className="flex items-center gap-1.5 text-[#A0A0A0]">
+                  <span>Costo horario operativo:</span>
+                  <span className="text-white font-semibold">{formatCurrency(rateElectricity + rateLabor + rateMachineWear + rateProductionPerMinute * 60)}/h</span>
                 </div>
-                <p className="text-[11px] text-[#A0A0A0] mb-4">Definí el precio por kilogramo de cada material. El sistema convierte automáticamente a costo por gramo.</p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {materials.map((mat) => (
-                    <div key={mat.id} className="p-3 bg-[#151515] rounded-xl border border-[rgba(255,255,255,0.08)] space-y-2">
-                      <label className="text-xs font-semibold text-white block">{mat.name}</label>
-                      <p className="text-[10px] text-[#666]">{mat.type}</p>
-                      <div className="relative">
-                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-[#A0A0A0]">$</span>
-                        <input
-                          type="number"
-                          min="0"
-                          step="1"
-                          value={Math.round((materialCosts[mat.id] ?? mat.costPerGram) * 1000)}
-                          onChange={(e) => {
-                            const kgPrice = Number(e.target.value);
-                            setMaterialCosts(prev => ({ ...prev, [mat.id]: kgPrice / 1000 }));
-                          }}
-                          className="w-full pl-6 pr-9 py-1.5 bg-[#0B0B0B] border border-[rgba(255,255,255,0.08)] rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#A78BFA]/40"
-                        />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-[#666]">/kg</span>
-                      </div>
-                      <p className="text-[9px] text-[#555]">
-                        = ${((materialCosts[mat.id] ?? mat.costPerGram)).toFixed(4)}/g
-                      </p>
-                    </div>
-                  ))}
+                <div className="w-px h-4 bg-[rgba(255,255,255,0.1)] hidden sm:block" />
+                <div className="flex items-center gap-1.5 text-[#A0A0A0]">
+                  <span>Material:</span>
+                  <span className="text-[#A78BFA] font-semibold">{formatCurrency(materialPricePerGram)}/g · {formatCurrency(materialPricePerGram * 1000)}/kg</span>
                 </div>
-              </div>
-              <div className="p-3 bg-[rgba(255,255,255,0.03)] rounded-xl border border-[rgba(255,255,255,0.06)] flex flex-wrap gap-4 text-xs text-[#A0A0A0] mb-4">
-                <span>Costo total por hora estimada:</span>
-                <span className="text-white font-semibold">
-                  {formatCurrency(rateElectricity + rateLabor + rateMachineWear)}/h
-                </span>
-                <span className="text-[#666]">· Los costos de material se calculan por gramo según el tipo seleccionado</span>
               </div>
 
               <div className="flex gap-3">
@@ -505,17 +499,6 @@ export function QuotationBuilder() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-white mb-1">Material</label>
-                      <Select value={material} onChange={(e) => setMaterial(e.target.value)}>
-                        {materials.map((m) => (
-                          <option key={m.id} value={m.name}>
-                            {m.name} - {formatCurrency(Math.round((materialCosts[m.id] ?? m.costPerGram) * 1000))}/kg
-                          </option>
-                        ))}
-                      </Select>
-                    </div>
-
-                    <div>
                       <label className="block text-sm font-medium text-white mb-1">Margen de Utilidad (%)</label>
                       <Input
                         type="number"
@@ -621,7 +604,10 @@ export function QuotationBuilder() {
                 <CardContent>
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between items-center">
-                      <span className="text-[#A0A0A0]">Material ({material})</span>
+                      <div>
+                        <span className="text-[#A0A0A0]">Material ({weight}g)</span>
+                        <span className="ml-2 text-[10px] text-[#A78BFA]">{formatCurrency(materialPricePerGram)}/g</span>
+                      </div>
                       <span className="text-white">{formatCurrency(materialCost)}</span>
                     </div>
                     <div className="flex justify-between items-center">
@@ -644,6 +630,13 @@ export function QuotationBuilder() {
                         <span className="ml-2 text-[10px] text-[#34D399]">{formatCurrency(rateMachineWear)}/h</span>
                       </div>
                       <span className="text-white">{formatCurrency(machineWearCost)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <span className="text-[#A0A0A0]">Producción ({Math.round(estimatedHours * 60)} min)</span>
+                        <span className="ml-2 text-[10px] text-[#F97316]">{formatCurrency(rateProductionPerMinute)}/min</span>
+                      </div>
+                      <span className="text-white">{formatCurrency(productionCost)}</span>
                     </div>
 
                     <div className="pt-3 border-t border-[rgba(255,255,255,0.08)] flex justify-between font-semibold">

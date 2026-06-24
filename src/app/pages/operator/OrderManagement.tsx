@@ -298,8 +298,8 @@ export function OrderManagement() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">
-              Gestión de Pedidos
+            <h1 className="text-3xl font-bold text-white mb-2"><br></br>
+              Listado de Pedidos
             </h1>
             <p className="text-[#A0A0A0]">
               {filteredOrders.length} pedido(s) encontrado(s)
