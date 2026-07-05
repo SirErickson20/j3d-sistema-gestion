@@ -72,14 +72,21 @@ export function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
   );
 }
 
-export function PaymentValidationStatusBadge({ status }: { status: PaymentValidationStatus }) {
-  const statusConfig: Record<PaymentValidationStatus, { label: string; variant: BadgeProps['variant'] }> = {
+export function PaymentValidationStatusBadge({ status }: { status: PaymentValidationStatus | string }) {
+  const statusConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
     pending_validation: { label: 'Pendiente de validación', variant: 'warning' },
     validated: { label: 'Validado', variant: 'success' },
     invalidated: { label: 'Invalidado', variant: 'danger' },
+    // Legacy support to prevent app crashes from old IndexedDB data
+    pending: { label: 'Pendiente de validación', variant: 'warning' },
+    completed: { label: 'Validado', variant: 'success' },
+    approved: { label: 'Validado', variant: 'success' },
   };
 
-  const config = statusConfig[status];
+  const config = statusConfig[status] || { 
+    label: typeof status === 'string' ? status : 'Desconocido', 
+    variant: 'default' 
+  };
 
   return (
     <Badge variant={config.variant}>
