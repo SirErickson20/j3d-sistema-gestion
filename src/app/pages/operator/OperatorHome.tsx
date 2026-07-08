@@ -20,10 +20,10 @@ export function OperatorHome() {
       desc: 'Administrar pedidos de catálogo y solicitudes personalizadas.'
     },
     {
-      label: 'Cotizaciones',
+      label: 'Presupuestos',
       path: '/admin/quotations',
       icon: Calculator,
-      desc: 'Crear y enviar cotizaciones para productos a medida.'
+      desc: 'Crear y enviar presupuestos para productos a medida.'
     },
     {
       label: 'Producción',

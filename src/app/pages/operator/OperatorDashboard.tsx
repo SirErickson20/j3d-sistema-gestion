@@ -221,7 +221,7 @@ export function OperatorDashboard() {
             icon={<DollarSign />}
           />
           <KPICard
-            title="Cotizaciones Pendientes"
+            title="Presupuestos Pendientes"
             value={pendingQuotationsCount}
             icon={<Clock />}
           />

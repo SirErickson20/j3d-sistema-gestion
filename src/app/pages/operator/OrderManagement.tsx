@@ -734,7 +734,7 @@ export function OrderManagement() {
                 {/* 1. Pending Quotation / Redesign -> Move to Pending Deposit */}
                 {(selectedOrder.status === 'pending_quotation' || selectedOrder.status === 'pending_approval') && (
                   <Button size="sm" variant="primary" onClick={() => handleStatusChange('pending_deposit')}>
-                    Aprobar Presupuesto Manualmente
+                    Aprobar Presupuesto
                   </Button>
                 )}
 
@@ -771,7 +771,7 @@ export function OrderManagement() {
                 {/* 4. In Production -> Move to Pending Balance */}
                 {selectedOrder.status === 'in_production' && (
                   <Button size="sm" variant="primary" onClick={() => handleStatusChange('pending_balance')}>
-                    Finalizar Producción (Pte. Saldo)
+                    Finalizar Producción  
                   </Button>
                 )}
 
@@ -803,7 +803,7 @@ export function OrderManagement() {
                   <Button size="sm" variant="primary" className="bg-[#3b82f6] hover:bg-[#2563eb]" onClick={() => {
                     handleStatusChange('delivered');
                   }}>
-                    Registrar Entrega Física (Entregado)
+                    Registrar Entrega
                   </Button>
                 )}
 

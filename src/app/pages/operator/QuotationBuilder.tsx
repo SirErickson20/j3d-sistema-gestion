@@ -204,8 +204,7 @@ export function QuotationBuilder() {
 
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2"><br />Constructor de Cotizaciones</h1>
-          <p className="text-[#A0A0A0]">Calcula y emite presupuestos en tiempo real</p>
+          <h1 className="text-3xl font-bold text-white mb-2"><br />Configurar Cotización</h1>
         </div>
 
         {/* ── Configuración de Costos Fijos ─────────────────────────────── */}
@@ -371,6 +370,12 @@ export function QuotationBuilder() {
             </div>
           )}
         </Card>
+
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Generar presupuesto</h1>
+          
+        </div>
 
         {/* ── Order Selector ──────────────────────────────────────────────── */}
         <Card hover>
@@ -690,7 +695,7 @@ export function QuotationBuilder() {
                       className="w-full bg-white text-[#FF1744] hover:bg-white/90 border-transparent shadow-lg"
                     >
                       <Send className="w-4 h-4 mr-1" />
-                      Enviar Cotización al Cliente
+                      Enviar Presupuesto al Cliente
                     </Button>
                   </div>
                 </CardContent>
