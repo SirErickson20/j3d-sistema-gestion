@@ -619,12 +619,52 @@ export function OrderManagement() {
 
               {/* Sequential Status Transitions Row */}
               <div className="flex flex-wrap gap-2 pt-4 border-t border-[rgba(255,255,255,0.08)]">
+                {/* 1. Pending Quotation / Redesign -> Move to Pending Deposit */}
+                {(selectedOrder.status === 'pending_quotation' || selectedOrder.status === 'pending_approval') && (
+                  <Button size="sm" variant="primary" onClick={() => handleStatusChange('pending_deposit')}>
+                    Aprobar Presupuesto Manualmente
+                  </Button>
+                )}
+
+                {/* 2. Quotation Sent -> Move to Pending Deposit */}
+                {selectedOrder.status === 'quotation_sent' && (
+                  <Button size="sm" variant="primary" onClick={() => handleStatusChange('pending_deposit')}>
+                    Aceptar Presupuesto (Cliente Acepta)
+                  </Button>
+                )}
+
+                {/* 3. Pending Deposit / Verification -> Move to In Production */}
+                {(selectedOrder.status === 'pending_deposit' || selectedOrder.status === 'deposit_verification') && selectedOrder.totalPrice > 0 && (
+                  <Button size="sm" variant="primary" className="bg-[#22C55E] hover:bg-[#16A34A]" onClick={() => {
+                    triggerConfirm(
+                      'Aprobar Seña e Iniciar Producción',
+                      '¿Desea registrar el pago de la seña (50%) e iniciar la producción del pedido?',
+                      () => {
+                        verifyPayment(selectedOrder.id, 'seña', 'approve');
+                        setSelectedOrder(prev => prev ? {
+                          ...prev,
+                          status: 'in_production',
+                          depositPaid: prev.totalPrice * 0.5,
+                          remainingBalance: prev.totalPrice * 0.5,
+                          paymentStatus: 'partial'
+                        } : null);
+                        toast.success('Seña aprobada. Pedido en Producción.');
+                      }
+                    );
+                  }}>
+                    Aprobar Seña (Iniciar Producción)
+                  </Button>
+                )}
+
+                {/* 4. In Production -> Move to Pending Balance */}
                 {selectedOrder.status === 'in_production' && (
                   <Button size="sm" variant="primary" onClick={() => handleStatusChange('pending_balance')}>
                     Finalizar Producción (Pte. Saldo)
                   </Button>
                 )}
-                {selectedOrder.status === 'pending_balance' && (
+
+                {/* 5. Pending Balance / Verification -> Move to Finished */}
+                {(selectedOrder.status === 'pending_balance' || selectedOrder.status === 'balance_verification') && (
                   <Button size="sm" variant="primary" className="bg-[#4ADE80] hover:bg-[#22C55E]" onClick={() => {
                     triggerConfirm(
                       'Aprobar Pago de Saldo',
@@ -645,6 +685,8 @@ export function OrderManagement() {
                     Aprobar Pago de Saldo (Finalizado)
                   </Button>
                 )}
+
+                {/* 6. Finished -> Move to Delivered */}
                 {selectedOrder.status === 'finished' && (
                   <Button size="sm" variant="primary" className="bg-[#3b82f6] hover:bg-[#2563eb]" onClick={() => {
                     handleStatusChange('delivered');
@@ -652,6 +694,8 @@ export function OrderManagement() {
                     Registrar Entrega Física (Entregado)
                   </Button>
                 )}
+
+                {/* Cancel Button */}
                 {selectedOrder.status !== 'delivered' && selectedOrder.status !== 'cancelled' && (
                   <Button size="sm" variant="outline" className="border-red-500/30 text-red-400 hover:bg-red-500/10 ml-auto" onClick={() => { setIsCancelOpen(true); setIsDetailOpen(false); }}>
                     Cancelar Pedido
