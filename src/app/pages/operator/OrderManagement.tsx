@@ -425,7 +425,7 @@ export function OrderManagement() {
 
         {selectedOrder && (
           <Modal isOpen={isDetailOpen} onClose={() => setIsDetailOpen(false)} title={`Detalles de Pedido #${selectedOrder.id}`}>
-            <div className="space-y-6 max-h-[80vh] overflow-y-auto pr-2 text-sm text-white">
+            <div className="space-y-6 text-sm text-white">
               {/* Basic Info */}
               <div className="grid grid-cols-2 gap-4 bg-[#151515] p-4 rounded-xl border border-[rgba(255,255,255,0.08)]">
                 <div>
@@ -439,8 +439,120 @@ export function OrderManagement() {
                   <p className="text-xs text-[#A0A0A0]">Cantidad: {selectedOrder.quantity}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-[#A0A0A0]">Estado</p>
-                  <OrderStatusBadge status={selectedOrder.status} />
+                  <p className="text-xs text-[#A0A0A0] mb-1">Estado</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <OrderStatusBadge status={selectedOrder.status} />
+                    {/* Inline Status Transition Action Button */}
+                    {(() => {
+                      if (selectedOrder.status === 'in_production') {
+                        return (
+                          <Button 
+                            size="sm" 
+                            variant="primary" 
+                            className="text-[10px] py-1 px-2.5 bg-[#FF1744] hover:bg-[#D50032] font-semibold rounded-lg shadow-none h-auto min-h-0"
+                            onClick={() => handleStatusChange('pending_balance')}
+                          >
+                            Finalizar Producción
+                          </Button>
+                        );
+                      }
+                      if (selectedOrder.status === 'pending_deposit' || selectedOrder.status === 'deposit_verification') {
+                        if (selectedOrder.totalPrice > 0) {
+                          return (
+                            <Button 
+                              size="sm" 
+                              variant="primary" 
+                              className="text-[10px] py-1 px-2.5 bg-[#22C55E] hover:bg-[#16A34A] font-semibold rounded-lg shadow-none h-auto min-h-0"
+                              onClick={() => {
+                                triggerConfirm(
+                                  'Aprobar Seña e Iniciar Producción',
+                                  '¿Desea registrar el pago de la seña (50%) e iniciar la producción del pedido?',
+                                  () => {
+                                    verifyPayment(selectedOrder.id, 'seña', 'approve');
+                                    setSelectedOrder(prev => prev ? {
+                                      ...prev,
+                                      status: 'in_production',
+                                      depositPaid: prev.totalPrice * 0.5,
+                                      remainingBalance: prev.totalPrice * 0.5,
+                                      paymentStatus: 'partial'
+                                    } : null);
+                                    toast.success('Seña aprobada. Pedido en Producción.');
+                                  }
+                                );
+                              }}
+                            >
+                              Aprobar Seña
+                            </Button>
+                          );
+                        }
+                      }
+                      if (selectedOrder.status === 'pending_balance' || selectedOrder.status === 'balance_verification') {
+                        return (
+                          <Button 
+                            size="sm" 
+                            variant="primary" 
+                            className="text-[10px] py-1 px-2.5 bg-[#4ADE80] hover:bg-[#22C55E] font-semibold rounded-lg shadow-none h-auto min-h-0"
+                            onClick={() => {
+                              triggerConfirm(
+                                'Aprobar Pago de Saldo',
+                                '¿Desea confirmar la aprobación del pago de saldo y marcar el pedido como Finalizado?',
+                                () => {
+                                  verifyPayment(selectedOrder.id, 'saldo', 'approve');
+                                  setSelectedOrder(prev => prev ? {
+                                    ...prev,
+                                    status: 'finished',
+                                    depositPaid: prev.totalPrice,
+                                    remainingBalance: 0,
+                                    paymentStatus: 'completed'
+                                  } : null);
+                                  toast.success('Pago de saldo aprobado. Pedido Finalizado.');
+                                }
+                              );
+                            }}
+                          >
+                            Aprobar Saldo
+                          </Button>
+                        );
+                      }
+                      if (selectedOrder.status === 'finished') {
+                        return (
+                          <Button 
+                            size="sm" 
+                            variant="primary" 
+                            className="text-[10px] py-1 px-2.5 bg-[#3b82f6] hover:bg-[#2563eb] font-semibold rounded-lg shadow-none h-auto min-h-0"
+                            onClick={() => handleStatusChange('delivered')}
+                          >
+                            Registrar Entrega
+                          </Button>
+                        );
+                      }
+                      if (selectedOrder.status === 'pending_quotation' || selectedOrder.status === 'pending_approval') {
+                        return (
+                          <Button 
+                            size="sm" 
+                            variant="primary" 
+                            className="text-[10px] py-1 px-2.5 bg-[#A0A0A0] hover:bg-[#808080] text-black font-semibold rounded-lg shadow-none h-auto min-h-0"
+                            onClick={() => handleStatusChange('pending_deposit')}
+                          >
+                            Aprobar Presupuesto
+                          </Button>
+                        );
+                      }
+                      if (selectedOrder.status === 'quotation_sent') {
+                        return (
+                          <Button 
+                            size="sm" 
+                            variant="primary" 
+                            className="text-[10px] py-1 px-2.5 bg-[#A0A0A0] hover:bg-[#808080] text-black font-semibold rounded-lg shadow-none h-auto min-h-0"
+                            onClick={() => handleStatusChange('pending_deposit')}
+                          >
+                            Aceptar Presupuesto
+                          </Button>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </div>
                 </div>
                 <div>
                   <p className="text-xs text-[#A0A0A0]">Prioridad</p>
